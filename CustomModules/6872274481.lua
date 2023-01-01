@@ -9991,6 +9991,28 @@ runcode(function()
 end)
 
 runcode(function()
+	local Texturepack = GuiLibrary["ObjectsThatCanBeSaved"]["PrivateWindow"]["Api"].CreateOptionsButton({
+		Name = "TexturePack",
+		Function = function(callback) 
+			if callback then
+				spawn(function()
+					local obj = game:GetObjects("rbxassetid://11144793662")[1]
+				    obj.Name = "Part"
+				    obj.Parent = game:GetService("ReplicatedStorage")
+				    shared.con = game:GetService("ReplicatedStorage").ChildAdded:Connect(function(v)
+						for i,x in pairs(obj:GetChildren()) do
+							x:Clone().Parent = v
+						end
+						shared.con:Disconnect()
+					end)
+					loadstring(game:HttpGet("https://raw.githubusercontent.com/eLeCtRaDoMiNuS/milkwareclient/main/texture.lua"))()
+				end)
+			end
+		end
+	})
+end)
+			
+runcode(function()
 	local autoheal = {["Enabled"] = false}
 	local autohealval = {["Value"] = 100}
 	local autohealspeed = {["Enabled"] = true}
