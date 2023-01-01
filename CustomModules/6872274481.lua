@@ -9383,7 +9383,33 @@ runcode(function()
 		["HoverText"] = "Switches to balloons in hotbar and inflates them."
 	})
 end)
-
+local oldallowplacement
+runcode(function()
+	local IgnorePlaceRegions = {["Enabled"] = false}
+	IgnorePlaceRegions = GuiLibrary["ObjectsThatCanBeSaved"]["PrivateWindow"]["Api"].CreateOptionsButton({
+		["Name"] = "BlockExploit(trash)",
+		["Function"] = function(callback)
+			if callback then
+				oldallowplacement = require(game:GetService("ReplicatedStorage").rbxts_include.node_modules["@easy-games"]["block-engine"].out).BlockEngine.isAllowedPlacement
+				require(game:GetService("ReplicatedStorage").rbxts_include.node_modules["@easy-games"]["block-engine"].out).BlockEngine.isAllowedPlacement = function(a, ab, abc, abcd)
+					return true
+				end
+				RunLoops:BindToHeartbeat("IgnorePlaceRegions", 1, function()
+					if lplr:GetAttribute("DenyBlockPlace") then
+						lplr:SetAttribute("DenyBlockPlace", false)
+					end
+				end)
+			else
+				require(game:GetService("ReplicatedStorage").rbxts_include.node_modules["@easy-games"]["block-engine"].out).BlockEngine.isAllowedPlacement = oldallowplacement
+				oldallowplacement = nil
+				pcall(function()
+					RunLoops:UnbindFromHeartbeat("IgnorePlaceRegions")
+				end)
+			end
+		end
+	})
+end)
+		
 runcode(function()
 	local AnticheatBypassTransparent = {["Enabled"] = false}
 	local AnticheatBypassAlternate = {["Enabled"] = false}
