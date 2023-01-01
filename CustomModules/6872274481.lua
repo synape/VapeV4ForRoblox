@@ -10335,6 +10335,32 @@ runcode(function()
 end)
 
 runcode(function()
+	local BreakFadingPlatforms = {["Enabled"] = false}
+	BreakFadingPlatforms = GuiLibrary["ObjectsThatCanBeSaved"]["PrivateWindow"]["Api"].CreateOptionsButton({
+		["Name"] = "BreakFadingPlatforms",
+		["Function"] = function(callback) 
+			if callback then
+				if (workspace:FindFirstChild("winter_minigame_mountain") == nil and matchState ~= 0) then
+					createwarning("BreakFadingPlatforms", "Please queue Minigame Mountain before using this function. If you are in the right game, please wait when spleef starts.", 10)
+				elseif WhitelistFunctions:IsSpecialIngame() and WhitelistFunctions:CheckPlayerType(lplr) == "DEFAULT" then
+					createwarning("BreakFadingPlatforms", "no", 10)
+				elseif workspace:FindFirstChild("winter_minigame_mountain") then
+					task.spawn(function()
+						for i,v in pairs(workspace.winter_minigame_mountain:GetDescendants()) do
+							task.wait()
+							if v:IsA("TouchTransmitter") and lplr.Character:FindFirstChild("HumanoidRootPart") then
+								firetouchinterest(v, lplr.Character.HumanoidRootPart, 0)
+							end
+						end
+					end)
+				end
+			end
+			BreakFadingPlatforms["ToggleButton"](false)
+		end
+	})
+end)
+
+runcode(function()
 	local CameraFix = {["Enabled"] = false}
 	CameraFix = GuiLibrary["ObjectsThatCanBeSaved"]["RenderWindow"]["Api"].CreateOptionsButton({
 		["Name"] = "GameFixer",
