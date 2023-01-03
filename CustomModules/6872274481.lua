@@ -5155,6 +5155,10 @@ runcode(function()
 			{CFrame = CFrame.new(0.69, -0.77, 1.47) * CFrame.Angles(math.rad(-33), math.rad(57), math.rad(-81)), Time = 0.12},
 			{CFrame = CFrame.new(0.74, -0.92, 0.88) * CFrame.Angles(math.rad(147), math.rad(71), math.rad(53)), Time = 0.12}
 		},
+		CustomSlow = {
+			{CFrame = CFrame.new(0.69, -0.77, 1.47) * CFrame.Angles(math.rad(-33), math.rad(57), math.rad(-81)), Time = 0.10},
+			{CFrame = CFrame.new(0.74, -0.92, 0.88) * CFrame.Angles(math.rad(147), math.rad(71), math.rad(53)), Time = 0.10}
+		},
 		["Vertical Spin"] = {
 			{CFrame = CFrame.new(0, 0, 0) * CFrame.Angles(math.rad(-90), math.rad(8), math.rad(5)), Time = 0.1},
 			{CFrame = CFrame.new(0, 0, 0) * CFrame.Angles(math.rad(180), math.rad(3), math.rad(13)), Time = 0.1},
@@ -5189,7 +5193,7 @@ runcode(function()
 	end
 
     Killaura = GuiLibrary["ObjectsThatCanBeSaved"]["BlatantWindow"]["Api"].CreateOptionsButton({
-        ["Name"] = "Killaura",
+        ["Name"] = "Killaura ",
         ["Function"] = function(callback)
             if callback then
 				if killauraaimcirclepart then 
@@ -5417,7 +5421,7 @@ runcode(function()
     })]]
     killauraanimmethod = Killaura.CreateDropdown({
         ["Name"] = "Animation", 
-        ["List"] = {"Normal", "Slow", "New", "Vertical Spin", "Exhibition", "Exhibition Old"},
+        ["List"] = {"Normal", "Slow", "New", "Vertical Spin", "Exhibition", "Exhibition Old","CustomSlow"},
         ["Function"] = function(val) end
     })
     killauramouse = Killaura.CreateToggle({
@@ -5545,7 +5549,7 @@ runcode(function()
 		end
 	})
 	killauraparticle = Killaura.CreateToggle({
-		["Name"] = "Crit Particle",
+		["Name"] = "Crit Particles",
 		["Function"] = function(callback)
 			if callback then 
 				killauraparticlepart = Instance.new("Part")
@@ -5562,6 +5566,33 @@ runcode(function()
 				particle.Enabled = true
 				particle.Size = NumberSequence.new(0.3)
 				particle.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(67, 10, 255)), ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 98, 255))})
+				particle.Parent = killauraparticlepart
+			else
+				if killauraparticlepart then 
+					killauraparticlepart:Destroy()
+					killauraparticlepart = nil
+				end
+			end
+		end
+	})
+	killauraparticle = Killaura.CreateToggle({
+		["Name"] = "Prism Crit Particles",
+		["Function"] = function(callback)
+			if callback then 
+				killauraparticlepart = Instance.new("Part")
+				killauraparticlepart.Transparency = 1
+				killauraparticlepart.CanCollide = false
+				killauraparticlepart.Anchored = true
+				killauraparticlepart.Size = Vector3.new(3, 6, 3)
+				killauraparticlepart.Parent = cam
+				local particle = Instance.new("ParticleEmitter")
+				particle.Lifetime = NumberRange.new(0.5)
+				particle.Rate = 500
+				particle.Speed = NumberRange.new(0)
+				particle.RotSpeed = NumberRange.new(180)
+				particle.Enabled = true
+				particle.Size = NumberSequence.new(0.3)
+				particle.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(159, 43, 104)), ColorSequenceKeypoint.new(1, Color3.fromRGB(159, 43, 104))})
 				particle.Parent = killauraparticlepart
 			else
 				if killauraparticlepart then 
@@ -5596,15 +5627,12 @@ runcode(function()
         ["Function"] = function() end,
 		["HoverText"] = "Uses a custom animation for swinging"
     })
-	if WhitelistFunctions:CheckPlayerType(lplr) ~= "DEFAULT" then
-		killauranovape = Killaura.CreateToggle({
-			["Name"] = "No Vape",
-			["Function"] = function() end,
-			["HoverText"] = "no hit vape user"
-		})
-	end
+	killauranovape = Killaura.CreateToggle({
+		["Name"] = "No Vape",
+		["Function"] = function() end,
+		["HoverText"] = "no hit vape user"
+	})
 end)
-
 runcode(function()
 	local BowAura = {["Enabled"] = false}
 	local BowAuraRange = {["Value"] = 40}
@@ -9129,7 +9157,7 @@ runcode(function()
 						end
 						oldseat = sit	
 					end
-					local targetvelo = (Vector3.new(clone.Position.X, 0, clone.Position.Z) - Vector3.new(oldcloneroot.Position.X, 0, oldcloneroot.Position.Z))
+					local targetvelo = (clone.AssemblyLinearVelocity)
 					local speed = ((sit or bedwars["HangGliderController"].hangGliderActive) and targetvelo.Magnitude or 20 * getSpeedMultiplier())
 					targetvelo = (targetvelo.Unit == targetvelo.Unit and targetvelo.Unit or Vector3.zero) * speed
 					bodyvelo.Velocity = Vector3.new(0, clone.Velocity.Y, 0)
@@ -9264,7 +9292,7 @@ runcode(function()
 							lagbackchanged = false
 							lagbacknotification = false
 							if not shared.VapeOverrideAnticheatBypass then
-								if entity.character.Humanoid.Sit ~= true then
+								if (not disabletpcheck) and entity.character.Humanoid.Sit ~= true then
 									anticheatfunnyyes = true 
 									local frameratecheck = getaverageframerate()
 									local framerate = AnticheatBypassNumbers.TPSpeed <= 0.3 and frameratecheck and -0.22 or 0
@@ -9384,7 +9412,7 @@ runcode(function()
 	end
 
 	AnticheatBypass = GuiLibrary["ObjectsThatCanBeSaved"]["UtilityWindow"]["Api"].CreateOptionsButton({
-		["Name"] = "AnticheatBypass",
+		["Name"] = "AnticheatBypass ",
 		["Function"] = function(callback)
 			if callback then
 				task.spawn(function()
@@ -9394,20 +9422,10 @@ runcode(function()
 							if not GuiLibrary["ObjectsThatCanBeSaved"]["FlyBoost SpeedToggle"]["Api"]["Enabled"] then 
 								GuiLibrary["ObjectsThatCanBeSaved"]["FlyBoost SpeedToggle"]["Api"]["ToggleButton"](true)
 							end
-							if AutoReport["Enabled"] == false then
-								AutoReport["ToggleButton"](false)
-							end
-							if AutoReportV2["Enabled"] == false then
-								AutoReportV2["ToggleButton"](false)
-							end
 						end
 					end)
-				--	GuiLibrary["ObjectsThatCanBeSaved"]["SpeedSpeedSlider"]["Api"]["SetValue"](74)
-				--	GuiLibrary["ObjectsThatCanBeSaved"]["SpeedModeDropdown"]["Api"]["SetValue"]("Heatseeker")
-				--	GuiLibrary["ObjectsThatCanBeSaved"]["FlySpeedSlider"]["Api"]["SetValue"](74)
-				--  GuiLibrary["ObjectsThatCanBeSaved"]["FlyModeDropdown"]["Api"]["SetValue"]("Heatseeker")
 				end)
-			--	anticheatbypassenable()
+				anticheatbypassenable()
 			else
 				allowspeed = true
 				if anticheatconnection then 
@@ -9449,8 +9467,7 @@ runcode(function()
 	})
 	local arrowdodgeconnection
 	local arrowdodgedata
-	
---[[	AnticheatBypassArrowDodge = AnticheatBypass.CreateToggle({
+		AnticheatBypassArrowDodge = AnticheatBypass.CreateToggle({
 		["Name"] = "Arrow Dodge",
 		["Function"] = function(callback)
 			if callback then
@@ -9485,7 +9502,7 @@ runcode(function()
 		end,
 		["Default"] = true,
 		["HoverText"] = "Dodge arrows (tanqr moment)"
-	})]]
+	})
 	AnticheatBypassAutoConfig = AnticheatBypass.CreateToggle({
 		["Name"] = "Auto Config",
 		["Function"] = function(callback) 
@@ -9577,29 +9594,28 @@ runcode(function()
 		["Function"] = function() end,
 		["Default"] = true
 	})
-	if shared.VapeDeveloper then 
-		AnticheatBypassTPSpeed = AnticheatBypass.CreateSlider({
-			["Name"] = "TPSpeed",
-			["Function"] = function(val) 
-				AnticheatBypassNumbers.TPSpeed = val / 100
-			end,
-			["Double"] = 100,
-			["Min"] = 1,
-			["Max"] = 100,
-			["Default"] = AnticheatBypassNumbers.TPSpeed * 100,
-		})
-		AnticheatBypassTPLerp = AnticheatBypass.CreateSlider({
-			["Name"] = "TPLerp",
-			["Function"] = function(val) 
-				AnticheatBypassNumbers.TPLerp = val / 100
-			end,
-			["Double"] = 100,
-			["Min"] = 1,
-			["Max"] = 100,
-			["Default"] = AnticheatBypassNumbers.TPLerp * 100,
-		})
-	end
+	AnticheatBypassTPSpeed = AnticheatBypass.CreateSlider({
+		["Name"] = "TPSpeed",
+		["Function"] = function(val) 
+			AnticheatBypassNumbers.TPSpeed = val / 100
+		end,
+		["Double"] = 100,
+		["Min"] = 1,
+		["Max"] = 100,
+		["Default"] = AnticheatBypassNumbers.TPSpeed * 100,
+	})
+	AnticheatBypassTPLerp = AnticheatBypass.CreateSlider({
+		["Name"] = "TPLerp",
+		["Function"] = function(val) 
+			AnticheatBypassNumbers.TPLerp = val / 100
+		end,
+		["Double"] = 100,
+		["Min"] = 1,
+		["Max"] = 100,
+		["Default"] = AnticheatBypassNumbers.TPLerp * 100,
+	})
 end)
+
 		
 runcode(function()
 	local autoheal = {["Enabled"] = false}
