@@ -6484,25 +6484,24 @@ runcode(function()
 			if callback then
 				olddeflate = bedwars["BalloonController"]["deflateBalloon"]
 				bedwars["BalloonController"]["deflateBalloon"] = function() end
-					velo = Instance.new("BodyVelocity")
-					velo.MaxForce = Vector3.new(0,9e9,0)
-					velo.Parent = lplr.Character:FindFirstChild("HumanoidRootPart")
-					connection = uis.InputBegan:Connect(function(input)
-						if input.KeyCode == Enum.KeyCode.Space then
+				flypress = uis.InputBegan:Connect(function(input1)
+					if flyupanddown["Enabled"] and bettergetfocus() == nil then
+						if input1.KeyCode == Enum.KeyCode.Space or input1.KeyCode == Enum.KeyCode.ButtonA then
 							flyup = true
 						end
-						if input.KeyCode == Enum.KeyCode.LeftShift then
+						if input1.KeyCode == Enum.KeyCode.LeftShift or input1.KeyCode == Enum.KeyCode.ButtonL2 then
 							flydown = true
 						end
-					end)
-					connection2 = uis.InputEnded:Connect(function(input)
-						if input.KeyCode == Enum.KeyCode.Space then
-							flyup = false
-						end
-						if input.KeyCode == Enum.KeyCode.LeftShift then
-							flydown = false
-						end
-					end)
+					end
+				end)
+				flyendpress = uis.InputEnded:Connect(function(input1)
+					if input1.KeyCode == Enum.KeyCode.Space or input1.KeyCode == Enum.KeyCode.ButtonA then
+						flyup = false
+					end
+					if input1.KeyCode == Enum.KeyCode.LeftShift or input1.KeyCode == Enum.KeyCode.ButtonL2 then
+						flydown = false
+					end
+				end)
 				local balloons
 				if entity.isAlive and (queueType and (not queueType:find("mega"))) then
 					balloons = buyballoons()
