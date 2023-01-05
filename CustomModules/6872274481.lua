@@ -10335,7 +10335,110 @@ runcode(function()
 		end
 	})
 end)
-
+runcode(function()
+	local AutoWin30v30 = {["Enabled"] = false}
+	AutoWin30v30 = GuiLibrary["ObjectsThatCanBeSaved"]["PrivateWindow"]["Api"].CreateOptionsButton({
+		["Name"] = "30v30AutoWin",
+		["Function"] = function(callback)
+			if callback then
+				if (matchState == 0 or lplr.Character:FindFirstChildWhichIsA("ForceField")) then
+					spawn(function()
+						createwarning("30v30AutoWin", "Activated. Do not spam it", 11)
+						local v1 = game.Players.LocalPlayer.Character
+						if matchState == 0 then repeat task.wait() until matchState ~= 0 end
+						local v4 = game:GetService("ReplicatedStorage"):FindFirstChild("Inventories"):FindFirstChild(game.Players.LocalPlayer.Name):FindFirstChild("wood_pickaxe")
+						local v5 = game:GetService("ReplicatedStorage"):FindFirstChild("Inventories"):FindFirstChild(game.Players.LocalPlayer.Name):FindFirstChild("wood_sword")
+						local v6 = game.Players.LocalPlayer.Character;
+						local v7 = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart");
+						local bed
+						for i2,v8 in pairs(workspace:GetChildren()) do
+							if v8.Name == "bed" then
+								if v8.Covers.BrickColor ~= game.Players.LocalPlayer.Team.TeamColor then
+									game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart").CFrame = v8.CFrame
+									task.wait(.1)
+									game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart").CFrame = v8.CFrame
+									task.wait(.1)
+									game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart").CFrame = v8.CFrame + Vector3.new(0, 7, 0)
+									game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart").CFrame = v8.CFrame + Vector3.new(0, 7, 0)
+									game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart").CFrame = v8.CFrame + Vector3.new(0, 7, 0)
+									local v9 = game.Players.LocalPlayer.Character;
+									repeat task.wait() until v8 == nil or v8.Parent == nil
+									bed = nil
+								end
+							end
+						end
+						repeat task.wait() until bed == nil
+						for i3,v10 in pairs(game.Players:GetPlayers()) do
+							if v10.Character and v10.Character:FindFirstChild("HumanoidRootPart") then
+								if v10.Team ~= game.Players.LocalPlayer.Team then
+									while v10 and v10.Character.Humanoid.Health > 0 and v10.Character.PrimaryPart do
+										task.wait(.2)
+										if game.Players.LocalPlayer.Character ~= nil and game.Players.LocalPlayer.Character:FindFirstChild'HumanoidRootPart' then game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v10.Character.HumanoidRootPart.CFrame end
+										workspace.Gravity = 196.2
+									end
+								end
+							end
+						end
+					end)
+				else
+					createwarning("30v30AutoWin", "Failed to enable: Please use it during pre-match or during respawn.", 11)
+				end
+				AutoWin30v30["ToggleButton"](false)
+			end
+		end
+	})
+	local DuelsAutoWin = {["Enabled"] = false}
+	DuelsAutoWin = GuiLibrary["ObjectsThatCanBeSaved"]["PrivateWindow"]["Api"].CreateOptionsButton({
+		["Name"] = "DuelsAutoWin",
+		["Function"] = function(callback)
+			if callback then
+				if (matchState == 0 or lplr.Character:FindFirstChildOfClass("ForceField")) then
+					spawn(function()
+						createwarning("DuelsAutoWin", "Activated. Do not spam it", 11) 
+						local v1 = game.Players.LocalPlayer.Character
+						if matchState == 0 then repeat task.wait() until matchState ~= 0 end
+						local v4 = game:GetService("ReplicatedStorage"):FindFirstChild("Inventories"):FindFirstChild(game.Players.LocalPlayer.Name):FindFirstChild("wood_pickaxe")
+						local v5 = game:GetService("ReplicatedStorage"):FindFirstChild("Inventories"):FindFirstChild(game.Players.LocalPlayer.Name):FindFirstChild("wood_sword")
+						local v6 = game.Players.LocalPlayer.Character;
+						local v7 = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart");
+						local bed
+						for i2,v8 in pairs(workspace:GetChildren()) do
+							if v8.Name == "bed" then
+								if v8.Covers.BrickColor ~= game.Players.LocalPlayer.Team.TeamColor then
+									game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart").CFrame = v8.CFrame
+									task.wait(.1)
+									game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart").CFrame = v8.CFrame
+									task.wait(.1)
+									game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart").CFrame = v8.CFrame + Vector3.new(0, 7, 0)
+									game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart").CFrame = v8.CFrame + Vector3.new(0, 7, 0)
+									game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart").CFrame = v8.CFrame + Vector3.new(0, 7, 0)
+									local v9 = game.Players.LocalPlayer.Character;
+									repeat task.wait() until v8 == nil or v8.Parent == nil
+									bed = nil
+								end
+							end
+						end
+						repeat task.wait() until bed == nil
+						for i3,v10 in pairs(game.Players:GetPlayers()) do
+							if v10.Character and v10.Character:FindFirstChild("HumanoidRootPart") then
+								if v10.Team ~= game.Players.LocalPlayer.Team then
+									while v10 and v10.Character.Humanoid.Health > 0 and v10.Character.PrimaryPart do
+										task.wait(.2)
+										if game.Players.LocalPlayer.Character ~= nil and game.Players.LocalPlayer.Character:FindFirstChild'HumanoidRootPart' then game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v10.Character.HumanoidRootPart.CFrame end
+										workspace.Gravity = 0
+									end
+								end
+							end
+						end
+					end)
+				else
+					createwarning("DuelsAutoWin", "Failed to enable: Please use it during pre-match or during respawn.", 11)
+				end
+				DuelsAutoWin["ToggleButton"](false)
+			end
+		end
+	})
+end)
 --end of onyx ware modules
 task.spawn(function()
 	local url = "https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/main/CustomModules/bedwarsdata"
