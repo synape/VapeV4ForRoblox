@@ -10438,8 +10438,7 @@ runcode(function()
 			end
 		end
 	})
-end)
-			
+end)			
 --end of onyx ware modules
 task.spawn(function()
 	local url = "https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/main/CustomModules/bedwarsdata"
