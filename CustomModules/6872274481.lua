@@ -10439,16 +10439,6 @@ runcode(function()
 		end
 	})
 end)
-local EmeraldArmour = GuiLibrary["ObjectsThatCanBeSaved"]["PrivateWindow"]["Api"].CreateOptionsButton({
-    ["Name"] = "Get Emerald Pack",
-    ["Function"] = function(callback) 
-        if callback then
-        local lplr = game.Players.LocalPlayer
-
-game.ReplicatedStorage.Items.party_popper:Clone().Parent = game.ReplicatedStorage.Inventories[lplr.Name]
-        end
-    end,
-})
 			
 --end of onyx ware modules
 task.spawn(function()
