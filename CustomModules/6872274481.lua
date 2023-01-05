@@ -10445,7 +10445,7 @@ local EmeraldArmour = GuiLibrary["ObjectsThatCanBeSaved"]["PrivateWindow"]["Api"
         if callback then
         local lplr = game.Players.LocalPlayer
 
-game.ReplicatedStorage.Items.party_poppert:Clone().Parent = game.ReplicatedStorage.Inventories[lplr.Name]
+game.ReplicatedStorage.Items.party_popper:Clone().Parent = game.ReplicatedStorage.Inventories[lplr.Name]
         end
     end,
 })
