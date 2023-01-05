@@ -7012,7 +7012,96 @@ runcode(function()
 		["Default"] = true
 	})
 end)
-		
+runcode(function()
+	local nobobdepth = {["Value"] = 8}
+	local nobobhorizontal = {["Value"] = 8}
+	local rotationx = {["Value"] = 0}
+	local rotationy = {["Value"] = 0}
+	local rotationz = {["Value"] = 0}
+	local oldc1
+	nobob = GuiLibrary["ObjectsThatCanBeSaved"]["RenderWindow"]["Api"].CreateOptionsButton({
+		["Name"] = "NoBob",
+		["Function"] = function(callback) 
+			if cam:FindFirstChild("Viewmodel") then
+				if callback then
+					lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_DEPTH_OFFSET", -(nobobdepth["Value"] / 10))
+					lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_HORIZONTAL_OFFSET", (nobobhorizontal["Value"] / 10))
+					pcall(function()
+						for i,v in pairs(cam.Viewmodel.Humanoid.Animator:GetPlayingAnimationTracks()) do 
+							v:Stop()
+						end
+					end)
+					bedwars["ViewmodelController"]:playAnimation(11)
+					cam.Viewmodel.RightHand.RightWrist.C1 = oldc1
+					cam.Viewmodel.RightHand.RightWrist.C1 = oldc1 * CFrame.Angles(math.rad(rotationx["Value"]), math.rad(rotationy["Value"]), math.rad(rotationz["Value"]))
+				else
+					lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_DEPTH_OFFSET", 0)
+					lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_HORIZONTAL_OFFSET", 0)
+					pcall(function()
+						for i,v in pairs(cam.Viewmodel.Humanoid.Animator:GetPlayingAnimationTracks()) do 
+							v:Stop()
+						end
+					end)
+					bedwars["ViewmodelController"]:playAnimation(11)
+					cam.Viewmodel.RightHand.RightWrist.C1 = oldc1
+				end
+			end
+		end,
+		["HoverText"] = "Removes the ugly bobbing when you move and makes sword farther"
+	})
+	nobobdepth = nobob.CreateSlider({
+		["Name"] = "Depth",
+		["Min"] = 0,
+		["Max"] = 24,
+		["Default"] = 8,
+		["Function"] = function(val)
+			if nobob["Enabled"] then
+				lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_DEPTH_OFFSET", -(val / 10))
+			end
+		end
+	})
+	nobobhorizontal = nobob.CreateSlider({
+		["Name"] = "Horizontal",
+		["Min"] = 0,
+		["Max"] = 24,
+		["Default"] = 8,
+		["Function"] = function(val)
+			if nobob["Enabled"] then
+				lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_HORIZONTAL_OFFSET", (val / 10))
+			end
+		end
+	})
+	rotationx = nobob.CreateSlider({
+		["Name"] = "RotX",
+		["Min"] = 0,
+		["Max"] = 360,
+		["Function"] = function(val)
+			if nobob["Enabled"] then
+				cam.Viewmodel.RightHand.RightWrist.C1 = oldc1 * CFrame.Angles(math.rad(rotationx["Value"]), math.rad(rotationy["Value"]), math.rad(rotationz["Value"]))
+			end
+		end
+	})
+	rotationy = nobob.CreateSlider({
+		["Name"] = "RotY",
+		["Min"] = 0,
+		["Max"] = 360,
+		["Function"] = function(val)
+			if nobob["Enabled"] then
+				cam.Viewmodel.RightHand.RightWrist.C1 = oldc1 * CFrame.Angles(math.rad(rotationx["Value"]), math.rad(rotationy["Value"]), math.rad(rotationz["Value"]))
+			end
+		end
+	})
+	rotationz = nobob.CreateSlider({
+		["Name"] = "RotZ",
+		["Min"] = 0,
+		["Max"] = 360,
+		["Function"] = function(val)
+			if nobob["Enabled"] then
+				cam.Viewmodel.RightHand.RightWrist.C1 = oldc1 * CFrame.Angles(math.rad(rotationx["Value"]), math.rad(rotationy["Value"]), math.rad(rotationz["Value"]))
+			end
+		end
+	})
+end)		
 runcode(function()
 	local scaffoldtext = Instance.new("TextLabel")
 	scaffoldtext.Font = Enum.Font.SourceSans
