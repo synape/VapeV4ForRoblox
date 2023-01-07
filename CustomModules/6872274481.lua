@@ -6486,19 +6486,19 @@ runcode(function()
 				bedwars["BalloonController"]["deflateBalloon"] = function() end
 				flypress = uis.InputBegan:Connect(function(input1)
 					if flyupanddown["Enabled"] and bettergetfocus() == nil then
-						if input1.KeyCode == Enum.KeyCode.Space or input1.KeyCode == Enum.KeyCode.ButtonA then
+						if input1.KeyCode == Enum.KeyCode.Space then
 							flyup = true
 						end
-						if input1.KeyCode == Enum.KeyCode.LeftShift or input1.KeyCode == Enum.KeyCode.ButtonL2 then
+						if input1.KeyCode == Enum.KeyCode.LeftShift then
 							flydown = true
 						end
 					end
 				end)
 				flyendpress = uis.InputEnded:Connect(function(input1)
-					if input1.KeyCode == Enum.KeyCode.Space or input1.KeyCode == Enum.KeyCode.ButtonA then
+					if input1.KeyCode == Enum.KeyCode.Space then
 						flyup = false
 					end
-					if input1.KeyCode == Enum.KeyCode.LeftShift or input1.KeyCode == Enum.KeyCode.ButtonL2 then
+					if input1.KeyCode == Enum.KeyCode.LeftShift then
 						flydown = false
 					end
 				end)
