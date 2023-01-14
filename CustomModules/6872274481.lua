@@ -4695,7 +4695,7 @@ runcode(function()
 					damagetimer = p7.knockbackMultiplier.horizontal * sliderval2["Value"] or 0
 					damagetimertick = 2.5
 					local newpos = (entity.character.HumanoidRootPart.Position - p7.fromPosition)
-					directionvec = Vector3.new(newpos.X, 0, newpos.Z).Unit
+					directionvec = Vector3.new(newpos.X, 50, newpos.Z).Unit
 				end
 			end)
 		end)
@@ -4823,7 +4823,7 @@ runcode(function()
 									longjumpacprogressbartext.Text = (math.max(math.floor(damagetimertick * 10) / 10, 0)).."s"
 								end
 								if not passed then 
-									passed = getblock(entity.character.HumanoidRootPart.Position - Vector3.new(0, 0, 0)) == nil
+									passed = getblock(entity.character.HumanoidRootPart.Position - Vector3.new(0, 3, 0)) == nil
 								end
 								if directionvec == nil then 
 									directionvec = entity.character.HumanoidRootPart.CFrame.lookVector
