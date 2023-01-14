@@ -4828,8 +4828,8 @@ runcode(function()
 								if directionvec == nil then 
 									directionvec = entity.character.HumanoidRootPart.CFrame.lookVector
 								end
-								local newpos = Vector3.new(directionvec.X, 16, directionvec.Z)
-								local newvelo = newpos.Unit == newpos.Unit and newpos.Unit * (20 * getSpeedMultiplier()) or Vector3.zero
+								local newpos = Vector3.new(directionvec.X, 0, directionvec.Z)
+								local newvelo = newpos.Unit == newpos.Unit and newpos.Unit * (50 * getSpeedMultiplier()) or Vector3.zero
 								local val = (sliderval["Value"] / 10)
 								newpos = newpos * (math.max(3, damagetimer * ((damagetimertick - val) / (2.5 - val)))) * dt
 								local ray = workspace:Raycast(entity.character.HumanoidRootPart.Position, newpos, blockraycast)
