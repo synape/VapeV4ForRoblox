@@ -4715,7 +4715,7 @@ runcode(function()
 			if not longjump["Enabled"] then return end
 			task.delay(0.4, function()
 				if not longjump["Enabled"] then return end
-				pos = pos - (entity.character.HumanoidRootPart.CFrame.lookVector * 0)
+				pos = pos - (entity.character.HumanoidRootPart.CFrame.lookVector * 0.2)
 				if not (getblock(pos - Vector3.new(0, 3, 0)) or getblock(pos - Vector3.new(0, 6, 0))) then
 					local sound = Instance.new("Sound")
 					sound.SoundId = "rbxassetid://4809574295"
