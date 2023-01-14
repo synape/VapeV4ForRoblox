@@ -4680,7 +4680,6 @@ runcode(function()
 		end
 	})
 end)
-
 runcode(function()
 	local damagetimer = 0
 	local damagetimertick = 0
@@ -4866,7 +4865,7 @@ runcode(function()
 				damagetimertick = 0
 			end
 		end, 
-		["HoverText"] = "Lets you jump farther (Not landing on same level & Spamming can lead to lagbacks)"
+		["HoverText"] = "Lets you fly for 3 seconds(can go up to 50 speed)"
 	})
 	sliderval = longjump.CreateSlider({
 		Name = "Slowdown",
@@ -4879,9 +4878,9 @@ runcode(function()
 	sliderval2 = longjump.CreateSlider({
 		Name = "Speed",
 		Min = 1,
-		Max = 76,
+		Max = 50,
 		Function = function() end,
-		Default = 65
+		Default = 50
 	})
 end)
 
