@@ -4829,7 +4829,7 @@ runcode(function()
 									directionvec = entity.character.HumanoidRootPart.CFrame.lookVector
 								end
 								local newpos = Vector3.new(directionvec.X, 0, directionvec.Z)
-								local newvelo = newpos.Unit == newpos.Unit and newpos.Unit * (50 * getSpeedMultiplier()) or Vector3.zero
+								local newvelo = newpos.Unit == newpos.Unit and newpos.Unit * (20 * getSpeedMultiplier()) or Vector3.zero
 								local val = (sliderval["Value"] / 10)
 								newpos = newpos * (math.max(3, damagetimer * ((damagetimertick - val) / (2.5 - val)))) * dt
 								local ray = workspace:Raycast(entity.character.HumanoidRootPart.Position, newpos, blockraycast)
@@ -4841,8 +4841,6 @@ runcode(function()
 								entity.character.HumanoidRootPart.CFrame = entity.character.HumanoidRootPart.CFrame + newpos
 							else
 								longjumpacprogressbartext.Text = "2.5s"
-								entity.character.HumanoidRootPart.CFrame = CFrame.new(startpos, startpos + entity.character.HumanoidRootPart.CFrame.lookVector)
-								entity.character.HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
 								if tntcheck then 
 									entity.character.HumanoidRootPart.CFrame = CFrame.new(tntcheck + entity.character.HumanoidRootPart.CFrame.lookVector, tntcheck + (entity.character.HumanoidRootPart.CFrame.lookVector * 2))
 								end
