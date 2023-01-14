@@ -4695,7 +4695,7 @@ runcode(function()
 					damagetimer = p7.knockbackMultiplier.horizontal * sliderval2["Value"] or 0
 					damagetimertick = 2.5
 					local newpos = (entity.character.HumanoidRootPart.Position - p7.fromPosition)
-					directionvec = Vector3.new(newpos.X, 50, newpos.Z).Unit
+					directionvec = Vector3.new(newpos.X, 0, newpos.Z).Unit
 				end
 			end)
 		end)
@@ -4715,7 +4715,7 @@ runcode(function()
 			if not longjump["Enabled"] then return end
 			task.delay(0.4, function()
 				if not longjump["Enabled"] then return end
-				pos = pos - (entity.character.HumanoidRootPart.CFrame.lookVector * 0.2)
+				pos = pos - (entity.character.HumanoidRootPart.CFrame.lookVector * 0)
 				if not (getblock(pos - Vector3.new(0, 3, 0)) or getblock(pos - Vector3.new(0, 6, 0))) then
 					local sound = Instance.new("Sound")
 					sound.SoundId = "rbxassetid://4809574295"
