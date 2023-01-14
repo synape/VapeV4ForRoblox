@@ -4823,7 +4823,7 @@ runcode(function()
 									longjumpacprogressbartext.Text = (math.max(math.floor(damagetimertick * 10) / 10, 0)).."s"
 								end
 								if not passed then 
-									passed = getblock(entity.character.HumanoidRootPart.Position - Vector3.new(0, 3, 0)) == nil
+									passed = getblock(entity.character.HumanoidRootPart.Position - Vector3.new(0, 0, 0)) == nil
 								end
 								if directionvec == nil then 
 									directionvec = entity.character.HumanoidRootPart.CFrame.lookVector
@@ -4841,6 +4841,8 @@ runcode(function()
 								entity.character.HumanoidRootPart.CFrame = entity.character.HumanoidRootPart.CFrame + newpos
 							else
 								longjumpacprogressbartext.Text = "2.5s"
+								entity.character.HumanoidRootPart.CFrame = CFrame.new(startpos, startpos + entity.character.HumanoidRootPart.CFrame.lookVector)
+								entity.character.HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
 								if tntcheck then 
 									entity.character.HumanoidRootPart.CFrame = CFrame.new(tntcheck + entity.character.HumanoidRootPart.CFrame.lookVector, tntcheck + (entity.character.HumanoidRootPart.CFrame.lookVector * 2))
 								end
