@@ -38,19 +38,6 @@ local lagbackevent = Instance.new("BindableEvent")
 local allowspeed = true
 local antivoiding = false
 local textchatservice = game:GetService("TextChatService")
-local bettergetfocus = function()
-	if KRNL_LOADED then
-		-- krnl is so garbage, you literally cannot detect focused textbox with UIS
-		if game:GetService("StarterGui"):GetCoreGuiEnabled(Enum.CoreGuiType.Chat) then
-			if textchatservice and textchatservice.ChatVersion == Enum.ChatVersion.TextChatService then
-				return ((game:GetService("CoreGui").ExperienceChat.appLayout.chatInputBar.Background.Container.TextContainer.TextBoxContainer.TextBox:IsFocused() or searchbar:IsFocused()) and true or nil)
-			else
-				return ((game:GetService("Players").LocalPlayer.PlayerGui.Chat.Frame.ChatBarParentFrame.Frame.BoxFrame.Frame.ChatBar:IsFocused() or searchbar:IsFocused()) and true or nil) 
-			end
-		end
-	end
-	return game:GetService("UserInputService"):GetFocusedTextBox()
-end
 local betterisfile = function(file)
 	local suc, res = pcall(function() return readfile(file) end)
 	return suc and res ~= nil
@@ -1610,7 +1597,7 @@ do
                 local humrootpart = char:WaitForChild("HumanoidRootPart", 10)
                 local head = char:WaitForChild("Head", 10)
                 local hum = char:WaitForChild("Humanoid", 10)
-                if humrootpart and hum and head then
+                if humrootpart and hum and head and entity.entityIds[plr.Name] == id then
 					local childremoved
                     local newent
                     if localcheck then
@@ -2301,6 +2288,7 @@ GuiLibrary["RemoveObject"]("ClientKickDisablerOptionsButton")
 GuiLibrary["RemoveObject"]("NameTagsOptionsButton")
 GuiLibrary["RemoveObject"]("CapeOptionsButton")
 GuiLibrary["RemoveObject"]("SafeWalkOptionsButton")
+GuiLibrary["RemoveObject"]("BlinkOptionsButton")
 
 runcode(function()
 	local AimAssist = {["Enabled"] = false}
@@ -2781,11 +2769,10 @@ runcode(function()
 			if callback then
 				task.spawn(function()
 					repeat
-						task.wait()
-						if (not Sprint["Enabled"]) then break end
 						if (not bedwars["sprintTable"].sprinting) then
 							bedwars["sprintTable"]:startSprinting()
 						end
+						task.wait()
 					until (not Sprint["Enabled"])
 				end)
 				sprintconnection = lplr.CharacterAdded:Connect(function(char)
@@ -2929,6 +2916,9 @@ runcode(function()
 											entity.character.HumanoidRootPart.CFrame = CFrame.new(realnewpos.p.X, pos.Y, realnewpos.p.Z)
 											antivoidvelo = newpos == newpos and newpos * 20 or Vector3.zero
 											entity.character.HumanoidRootPart.Velocity = Vector3.new(antivoidvelo.X, entity.character.HumanoidRootPart.Velocity.Y, antivoidvelo.Z)
+											if getblock((entity.character.HumanoidRootPart.CFrame.p - Vector3.new(0, 1, 0)) + entity.character.HumanoidRootPart.Velocity.Unit) then
+												pos = pos + Vector3.new(0, 1, 0)
+											end
 										else
 											RunLoops:UnbindFromHeartbeat("AntiVoid")
 											antivoidvelo = nil
@@ -2943,13 +2933,13 @@ runcode(function()
 						end
 					end)
 					repeat
-						task.wait()
 						if entity.isAlive and AntiVoidMode["Value"] == "Normal" then 
 							local ray = workspace:Raycast(entity.character.HumanoidRootPart.Position, Vector3.new(0, -1000, 0), blockraycast)
 							if ray or GuiLibrary["ObjectsThatCanBeSaved"]["FlyOptionsButton"]["Api"]["Enabled"] then 
 								antivoidpart.Position = entity.character.HumanoidRootPart.Position - Vector3.new(0, 21, 0)
 							end
 						end
+						task.wait()
 					until (not AntiVoid["Enabled"])
 				end)
 			else
@@ -3205,10 +3195,26 @@ runcode(function()
                 end)
                 task.spawn(function()
                     repeat
-                        task.wait()
 						if (nukernofly["Enabled"] == false or GuiLibrary["ObjectsThatCanBeSaved"]["FlyOptionsButton"]["Api"]["Enabled"] == false) then
+							if nukerbeds["Enabled"] then
+								for i, obj in pairs(collectionservice:GetTagged("bed")) do
+									if entity.isAlive then
+										if obj and bedwars["BlockController"]:isBlockBreakable({blockPosition = obj.Position / 3}, lplr) and obj.Parent ~= nil then
+											if ((oldcloneroot and oldcloneroot.Position or localserverpos or entity.character.HumanoidRootPart.Position) - obj.Position).magnitude <= nukerrange["Value"] then
+												local tool = (not nukerlegit["Enabled"]) and {Name = "wood_axe"} or getEquipped()["Object"]
+												if tool and bedwars["ItemTable"][tool.Name]["breakBlock"] then
+													local res, amount = getbestside(obj.Position)
+													local res2, amount2 = getbestside(obj.Position + Vector3.new(0, 0, 3))
+													bedwars["breakBlock"]((amount < amount2 and obj.Position or obj.Position + Vector3.new(0, 0, 3)), nukereffects["Enabled"], (amount < amount2 and res or res2), false, nukeranimation["Enabled"])
+													break
+												end
+											end
+										end
+									end
+								end
+							end
 							for i, obj in pairs(luckyblocktable) do
-								if entity.isAlive  then
+								if entity.isAlive then
 									if obj and bedwars["BlockController"]:isBlockBreakable({blockPosition = obj.Position / 3}, lplr) and obj.Parent ~= nil then
 										if ((oldcloneroot and oldcloneroot.Position or localserverpos or entity.character.HumanoidRootPart.Position) - obj.Position).magnitude <= nukerrange["Value"] and (nukerown["Enabled"] or obj:GetAttribute("PlacedByUserId") ~= lplr.UserId) then
 											local tool = (not nukerlegit["Enabled"]) and {Name = "wood_axe"} or getEquipped()["Object"]
@@ -3221,28 +3227,7 @@ runcode(function()
 								end
 							end
 						end
-                    until Nuker["Enabled"] == false
-                end)
-                task.spawn(function()
-                    repeat
-                        task.wait()
-                        if nukerbeds["Enabled"] and (nukernofly["Enabled"] == false or GuiLibrary["ObjectsThatCanBeSaved"]["FlyOptionsButton"]["Api"]["Enabled"] == false) then
-                            for i, obj in pairs(collectionservice:GetTagged("bed")) do
-                                if entity.isAlive then
-                                    if obj and bedwars["BlockController"]:isBlockBreakable({blockPosition = obj.Position / 3}, lplr) and obj.Parent ~= nil then
-                                        if ((oldcloneroot and oldcloneroot.Position or localserverpos or entity.character.HumanoidRootPart.Position) - obj.Position).magnitude <= nukerrange["Value"] then
-											local tool = (not nukerlegit["Enabled"]) and {Name = "wood_axe"} or getEquipped()["Object"]
-											if tool and bedwars["ItemTable"][tool.Name]["breakBlock"] then
-												local res, amount = getbestside(obj.Position)
-												local res2, amount2 = getbestside(obj.Position + Vector3.new(0, 0, 3))
-												bedwars["breakBlock"]((amount < amount2 and obj.Position or obj.Position + Vector3.new(0, 0, 3)), nukereffects["Enabled"], (amount < amount2 and res or res2), false, nukeranimation["Enabled"])
-												break
-											end
-                                        end
-                                    end
-                                end
-                            end
-                        end
+						task.wait()
                     until (not Nuker["Enabled"])
                 end)
             else
@@ -4728,9 +4713,18 @@ runcode(function()
 	local damagemethods = {
 		fireball = function(fireball, pos)
 			if not longjump["Enabled"] then return end
-			task.delay(0.3, function()
+			task.delay(0.4, function()
 				if not longjump["Enabled"] then return end
 				pos = pos - (entity.character.HumanoidRootPart.CFrame.lookVector * 0.2)
+				if not (getblock(pos - Vector3.new(0, 3, 0)) or getblock(pos - Vector3.new(0, 6, 0))) then
+					local sound = Instance.new("Sound")
+					sound.SoundId = "rbxassetid://4809574295"
+					sound.Parent = workspace
+					sound.Ended:Connect(function()
+						sound:Destroy()
+					end)
+					sound:Play()
+				end
 				local origpos = pos
 				local offsetshootpos = (CFrame.new(pos, pos + Vector3.new(0, -60, 0)) * CFrame.new(Vector3.new(-bedwars["BowConstantsTable"].RelX, -bedwars["BowConstantsTable"].RelY, -bedwars["BowConstantsTable"].RelZ))).p
 				bedwars["BowTable"]:createLocalProjectile(bedwars["ProjectileMeta"]["fireball"], "fireball", "fireball", offsetshootpos, "", Vector3.new(0, -60, 0), {drawDurationSeconds = 1})
@@ -4780,6 +4774,7 @@ runcode(function()
 				task.spawn(function()
 					local startpos = entity.isAlive and entity.character.HumanoidRootPart.Position
 					local tntcheck
+					longjumpdelay = tick()
 					for i,v in pairs(damagemethods) do 
 						local item = getItem(i)
 						if item then
@@ -4797,7 +4792,7 @@ runcode(function()
 					local passed = false
 					local changecheck
 					longjumpacprogressbarframe.Visible = true
-					local funnytick = tick() + 0.3
+					local funnytick = tick() + 0.4
 					RunLoops:BindToHeartbeat("LongJump", 1, function(dt)
 						if entity.isAlive then 
 							if entity.character.Humanoid.Health <= 0 then 
@@ -4871,7 +4866,7 @@ runcode(function()
 				damagetimertick = 0
 			end
 		end, 
-		["HoverText"] = "Can only fly for 3 seconds"
+		["HoverText"] = "Lets you jump farther (Not landing on same level & Spamming can lead to lagbacks)"
 	})
 	sliderval = longjump.CreateSlider({
 		Name = "Slowdown",
@@ -4884,9 +4879,9 @@ runcode(function()
 	sliderval2 = longjump.CreateSlider({
 		Name = "Speed",
 		Min = 1,
-		Max = 50,
+		Max = 76,
 		Function = function() end,
-		Default = 50
+		Default = 65
 	})
 end)
 
@@ -4978,6 +4973,631 @@ runcode(function()
 		["Function"] = function() end,
 		["Default"] = 40
 	})
+end)
+
+runcode(function()
+	local killauraboxes = {}
+    local killauratargetframe = {["Players"] = {["Enabled"] = false}}
+	local killaurasortmethod = {["Value"] = "Distance"}
+    local killaurarealremote = bedwars["ClientHandler"]:Get(bedwars["AttackRemote"])["instance"]
+    local killauramethod = {["Value"] = "Normal"}
+	local killauraothermethod = {["Value"] = "Normal"}
+    local killauraanimmethod = {["Value"] = "Normal"}
+	local killauraaps = {["GetRandomValue"] = function() return 1 end}
+    local killaurarange = {["Value"] = 14}
+    local killauraangle = {["Value"] = 360}
+    local killauratargets = {["Value"] = 10}
+    local killauramouse = {["Enabled"] = false}
+    local killauracframe = {["Enabled"] = false}
+    local killauragui = {["Enabled"] = false}
+    local killauratarget = {["Enabled"] = false}
+    local killaurasound = {["Enabled"] = false}
+    local killauraswing = {["Enabled"] = false}
+    local killaurahandcheck = {["Enabled"] = false}
+    local killaurabaguette = {["Enabled"] = false}
+    local killauraanimation = {["Enabled"] = false}
+	local killauracolor = {["Value"] = 0.44}
+	local killauranovape = {["Enabled"] = false}
+	local killauratargethighlight = {["Enabled"] = false}
+	local killaurarangecircle = {["Enabled"] = false}
+	local killaurarangecirclepart
+	local killauraaimcircle = {["Enabled"] = false}
+	local killauraaimcirclepart
+	local killauraparticle = {["Enabled"] = false}
+	local killauraparticlepart
+	local killaurahitdelay = tick()
+    local killauradelay = 0
+    local Killauranear = false
+    local killauraplaying = false
+    local oldplay = function() end
+    local oldsound = function() end
+    local origC0 = nil
+	local killauracurrentanim
+	local targettable = {}
+	local targetsize = 0
+	local animationdelay = tick()
+
+	local function getStrength(plr)
+		local inv = inventories[plr.Player]
+		local strength = 0
+		local strongestsword = 0
+		if inv then
+			for i,v in pairs(inv.items) do 
+				local itemmeta = bedwars["ItemTable"][v.itemType]
+				if itemmeta and itemmeta.sword and itemmeta.sword.damage > strongestsword then 
+					strongestsword = itemmeta.sword.damage / 100
+				end	
+			end
+			strength = strength + strongestsword
+			for i,v in pairs(inv.armor) do 
+				local itemmeta = bedwars["ItemTable"][v.itemType]
+				if itemmeta and itemmeta.armor then 
+					strength = strength + (itemmeta.armor.damageReductionMultiplier or 0)
+				end
+			end
+			strength = strength
+		end
+		return strength
+	end
+
+	local killaurasortmethods = {
+		Distance = function(a, b)
+			return (a.RootPart.Position - entity.character.HumanoidRootPart.Position).Magnitude < (b.RootPart.Position - entity.character.HumanoidRootPart.Position).Magnitude
+		end,
+		Health = function(a, b) 
+			return a.Humanoid.Health < b.Humanoid.Health
+		end,
+		Threat = function(a, b) 
+			return getStrength(a) > getStrength(b)
+		end,
+	}
+	local lastplr
+
+	local function newAttackEntity(plr, firstplayercodedone, attackedplayers)
+		if not entity.isAlive then
+			return nil
+		end
+		local root = plr.RootPart
+		if not root then 
+			return nil
+		end
+		if killauramouse["Enabled"] and (not uis:IsMouseButtonPressed(0)) then
+			return nil
+		end
+		if killauragui["Enabled"] and (not (#bedwars["AppController"]:getOpenApps() <= 2 and GuiLibrary["MainGui"].ScaledGui.ClickGui.Visible == false)) then
+			return nil
+		end
+		local equipped = getEquipped()
+		if killaurahandcheck["Enabled"] and (equipped["Type"] ~= "sword" or bedwars["KatanaController"].chargingMaid) then
+			return nil
+		end
+		if killauratargetframe["Walls"]["Enabled"] then
+			if not bedwars["SwordController"]:canSee({["player"] = plr.Player, ["getInstance"] = function() return plr.Character end}) then return nil end
+		end
+		local localfacing = entity.character.HumanoidRootPart.CFrame.lookVector
+		local vec = (plr.RootPart.Position - entity.character.HumanoidRootPart.Position).unit
+		local angle = math.acos(localfacing:Dot(vec))
+		if angle >= (math.rad(killauraangle["Value"]) / 2) then
+			return nil
+		end
+		local sword = killaurahandcheck["Enabled"] and {tool = equipped.Object} or (equipped.Object and (equipped.Object.Name == "frying_pan" or equipped.Object.Name == "baguette") and {tool = equipped.Object} or getSword())
+		local swordmeta = bedwars["ItemTable"][sword and sword["tool"] and sword["tool"].Name or "wood_sword"]
+		if (not firstplayercodedone.done) then
+			killauranear = true
+			firstplayercodedone.done = true
+			if animationdelay <= tick() then
+				animationdelay = tick() + 0.19
+				if not killauraswing["Enabled"] then 
+					bedwars["SwordController"]:playSwordEffect(swordmeta)
+				end
+			end
+		end
+		if killauratarget["Enabled"] then
+			table.insert(attackedplayers, plr)
+		end
+		if not (sword and sword["tool"]) then
+			return nil
+		end
+		if (workspace:GetServerTimeNow() - bedwars["SwordController"].lastAttack) < bedwars["ItemTable"][sword["tool"].Name].sword.attackSpeed then 
+			return nil
+		end
+		local playertype, playerattackable = WhitelistFunctions:CheckPlayerType(plr.Player)
+		if not playerattackable then
+			return nil
+		end
+		if killauranovape["Enabled"] and clients.ClientUsers[plr.Player.Name] then
+			return nil
+		end
+		if oldcloneroot then 
+			if (oldcloneroot.Position - root.Position).Magnitude >= 18 then 
+				return nil
+			end
+		end
+		local selfrootpos = entity.character.HumanoidRootPart.Position
+		local selfcheck = oldcloneroot and oldcloneroot.Position or localserverpos or selfrootpos
+		if (selfcheck - (otherserverpos[plr.Player] or root.Position)).Magnitude > 18 then 
+			return nil
+		end
+		local selfpos = selfrootpos + (killaurarange["Value"] > 14 and (selfrootpos - root.Position).magnitude > 14 and (CFrame.lookAt(selfrootpos, root.Position).lookVector * 4) or Vector3.zero)
+		bedwars["SwordController"].lastAttack = workspace:GetServerTimeNow() - 0.11
+		killaurarealremote:FireServer({
+			["weapon"] = sword["tool"],
+			["chargedAttack"] = {chargeRatio = swordmeta.sword and swordmeta.sword.chargedAttack and swordmeta.sword.chargedAttack.maxChargeTimeSec or 0},
+			["entityInstance"] = plr.Character,
+			["validate"] = {
+				["raycast"] = {
+					["cameraPosition"] = hashvec(cam.CFrame.p), 
+					["cursorDirection"] = hashvec(Ray.new(cam.CFrame.p, root.Position).Unit.Direction)
+				},
+				["targetPosition"] = hashvec(root.Position),
+				["selfPosition"] = hashvec(selfpos)
+			}
+		})
+	end
+
+	local orig
+	local orig2
+	local anims = {
+		Normal = {
+			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(295), math.rad(55), math.rad(290)), Time = 0.05},
+			{CFrame = CFrame.new(0.69, -0.71, 0.6) * CFrame.Angles(math.rad(200), math.rad(60), math.rad(1)), Time = 0.05}
+		},
+		Slow = {
+			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(295), math.rad(55), math.rad(290)), Time = 0.15},
+			{CFrame = CFrame.new(0.69, -0.71, 0.6) * CFrame.Angles(math.rad(200), math.rad(60), math.rad(1)), Time = 0.15}
+		},
+		New = {
+			{CFrame = CFrame.new(0.69, -0.77, 1.47) * CFrame.Angles(math.rad(-33), math.rad(57), math.rad(-81)), Time = 0.12},
+			{CFrame = CFrame.new(0.74, -0.92, 0.88) * CFrame.Angles(math.rad(147), math.rad(71), math.rad(53)), Time = 0.12}
+		},
+		["Vertical Spin"] = {
+			{CFrame = CFrame.new(0, 0, 0) * CFrame.Angles(math.rad(-90), math.rad(8), math.rad(5)), Time = 0.1},
+			{CFrame = CFrame.new(0, 0, 0) * CFrame.Angles(math.rad(180), math.rad(3), math.rad(13)), Time = 0.1},
+			{CFrame = CFrame.new(0, 0, 0) * CFrame.Angles(math.rad(90), math.rad(-5), math.rad(8)), Time = 0.1},
+			{CFrame = CFrame.new(0, 0, 0) * CFrame.Angles(math.rad(0), math.rad(-0), math.rad(-0)), Time = 0.1}
+		},
+		Exhibition = {
+			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(-30), math.rad(50), math.rad(-90)), Time = 0.1},
+			{CFrame = CFrame.new(0.7, -0.71, 0.59) * CFrame.Angles(math.rad(-84), math.rad(50), math.rad(-38)), Time = 0.2}
+		},
+		["Exhibition Old"] = {
+			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(-30), math.rad(50), math.rad(-90)), Time = 0.15},
+			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(-30), math.rad(50), math.rad(-90)), Time = 0.05},
+			{CFrame = CFrame.new(0.7, -0.71, 0.59) * CFrame.Angles(math.rad(-84), math.rad(50), math.rad(-38)), Time = 0.1},
+			{CFrame = CFrame.new(0.7, -0.71, 0.59) * CFrame.Angles(math.rad(-84), math.rad(50), math.rad(-38)), Time = 0.05},
+			{CFrame = CFrame.new(0.63, -0.1, 1.37) * CFrame.Angles(math.rad(-84), math.rad(50), math.rad(-38)), Time = 0.15}
+		}
+	}
+
+	local function closestpos(block, pos)
+		local blockpos = block:GetRenderCFrame()
+		local startpos = (blockpos * CFrame.new(-(block.Size / 2))).p
+		local endpos = (blockpos * CFrame.new((block.Size / 2))).p
+		local newpos = block.Position + (pos - block.Position)
+		local x = startpos.X > endpos.X and endpos.X or startpos.X
+		local y = startpos.Y > endpos.Y and endpos.Y or startpos.Y
+		local z = startpos.Z > endpos.Z and endpos.Z or startpos.Z
+		local x2 = startpos.X < endpos.X and endpos.X or startpos.X
+		local y2 = startpos.Y < endpos.Y and endpos.Y or startpos.Y
+		local z2 = startpos.Z < endpos.Z and endpos.Z or startpos.Z
+		return Vector3.new(math.clamp(newpos.X, x, x2), math.clamp(newpos.Y, y, y2), math.clamp(newpos.Z, z, z2))
+	end
+
+    Killaura = GuiLibrary["ObjectsThatCanBeSaved"]["BlatantWindow"]["Api"].CreateOptionsButton({
+        ["Name"] = "Killaura",
+        ["Function"] = function(callback)
+            if callback then
+				if killauraaimcirclepart then 
+					killauraaimcirclepart.Parent = cam
+				end
+				if killaurarangecirclepart then 
+					killaurarangecirclepart.Parent = cam
+				end
+				if killauraparticlepart then 
+					killauraparticlepart.Parent = cam
+				end
+				task.spawn(function()
+					repeat
+						task.wait()
+						if (killauraanimation["Enabled"] and not killauraswing["Enabled"]) then
+							if killauranear then
+								pcall(function()
+									if origC0 == nil then
+										origC0 = cam.Viewmodel.RightHand.RightWrist.C0
+									end
+									if killauraplaying == false then
+										killauraplaying = true
+										for i,v in pairs(anims[killauraanimmethod["Value"]]) do 
+											if (not Killaura["Enabled"]) or (not killauranear) then break end
+											killauracurrentanim = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(v.Time), {C0 = origC0 * v.CFrame})
+											killauracurrentanim:Play()
+											task.wait(v.Time - 0.01)
+										end
+										killauraplaying = false
+									end
+								end)	
+							end
+						end
+					until Killaura["Enabled"] == false
+				end)
+                oldplay = bedwars["ViewmodelController"]["playAnimation"]
+                oldsound = bedwars["SoundManager"]["playSound"]
+                bedwars["SoundManager"]["playSound"] = function(tab, soundid, ...)
+                    if (soundid == bedwars["SoundList"].SWORD_SWING_1 or soundid == bedwars["SoundList"].SWORD_SWING_2) and Killaura["Enabled"] and killaurasound["Enabled"] and killauranear then
+                        return nil
+                    end
+                    return oldsound(tab, soundid, ...)
+                end
+                bedwars["ViewmodelController"]["playAnimation"] = function(Self, id, ...)
+                    if id == 15 and killauranear and killauraswing["Enabled"] and entity.isAlive then
+                        return nil
+                    end
+                    if id == 15 and killauranear and killauraanimation["Enabled"] and entity.isAlive then
+                        return nil
+                    end
+                    return oldplay(Self, id, ...)
+                end
+				local targetedplayer
+				RunLoops:BindToHeartbeat("Killaura", 1, function()
+					for i,v in pairs(killauraboxes) do 
+						if v:IsA("BoxHandleAdornment") and v.Adornee then
+							local cf = v.Adornee and v.Adornee.CFrame
+							local onex, oney, onez = cf:ToEulerAnglesXYZ() 
+							v.CFrame = CFrame.new() * CFrame.Angles(-onex, -oney, -onez)
+						end
+					end
+					if entity.isAlive then
+						if killauraaimcirclepart then 
+							killauraaimcirclepart.Position = targetedplayer and closestpos(targetedplayer.RootPart, entity.character.HumanoidRootPart.Position) or Vector3.new(99999, 99999, 99999)
+						end
+						if killauraparticlepart then 
+							killauraparticlepart.Position = targetedplayer and targetedplayer.RootPart.Position or Vector3.new(99999, 99999, 99999)
+						end
+						local Root = entity.character.HumanoidRootPart
+						if Root then
+							if killaurarangecirclepart then 
+								killaurarangecirclepart.Position = Root.Position - Vector3.new(0, entity.character.Humanoid.HipHeight, 0)
+							end
+							local Neck = entity.character.Head:FindFirstChild("Neck")
+							local LowerTorso = Root.Parent and Root.Parent:FindFirstChild("LowerTorso")
+							local RootC0 = LowerTorso and LowerTorso:FindFirstChild("Root")
+							if Neck and RootC0 then
+								if orig == nil then
+									orig = Neck.C0.p
+								end
+								if orig2 == nil then
+									orig2 = RootC0.C0.p
+								end
+								if orig2 and killauracframe["Enabled"] then
+									if targetedplayer ~= nil then
+										local targetPos = targetedplayer.RootPart.Position + Vector3.new(0, 2, 0)
+										local direction = (Vector3.new(targetPos.X, targetPos.Y, targetPos.Z) - entity.character.Head.Position).Unit
+										local direction2 = (Vector3.new(targetPos.X, Root.Position.Y, targetPos.Z) - Root.Position).Unit
+										local lookCFrame = (CFrame.new(Vector3.zero, (Root.CFrame):VectorToObjectSpace(direction)))
+										local lookCFrame2 = (CFrame.new(Vector3.zero, (Root.CFrame):VectorToObjectSpace(direction2)))
+										Neck.C0 = CFrame.new(orig) * CFrame.Angles(lookCFrame.LookVector.Unit.y, 0, 0)
+										RootC0.C0 = lookCFrame2 + orig2
+									else
+										Neck.C0 = CFrame.new(orig)
+										RootC0.C0 = CFrame.new(orig2)
+									end
+								end
+							end
+						end
+					end
+				end)
+                task.spawn(function()
+					repeat
+						task.wait()
+						if (GuiLibrary["ObjectsThatCanBeSaved"]["Lobby CheckToggle"]["Api"]["Enabled"] == false or matchState ~= 0) and Killaura["Enabled"] then
+							targettable = {}
+							targetsize = 0
+							local plrs = GetAllNearestHumanoidToPosition(killauratargetframe["Players"]["Enabled"], killaurarange["Value"] - 0.0001, 1, false, (oldcloneroot and oldcloneroot.Position or localserverpos), killaurasortmethods[killaurasortmethod["Value"]])
+							local attackedplayers = {}
+							local firstplayercodedone = {done = false}
+							for i,plr in pairs(plrs) do
+								targettable[plr.Player.Name] = {
+									["UserId"] = plr.Player.UserId,
+									["Health"] = (plr.Humanoid and plr.Humanoid.Health or 10) + getShield(plr.Character),
+									["MaxHealth"] = (plr.Humanoid and plr.Humanoid.MaxHealth or 10)
+								}
+								targetsize = targetsize + 1
+								task.spawn(newAttackEntity, plr, firstplayercodedone, attackedplayers)
+								if firstplayercodedone.done then
+									targetedplayer = plr
+								end
+							end
+							for i,v in pairs(killauraboxes) do 
+								local attacked = attackedplayers[i]
+								v.Adornee = attacked and ((not killauratargethighlight["Enabled"]) and attacked.RootPart or (not GuiLibrary["ObjectsThatCanBeSaved"]["ChamsOptionsButton"]["Api"]["Enabled"]) and attacked.Character or nil)
+							end
+							if (#plrs <= 0) then
+								lastplr = nil
+								targetedplayer = nil
+								killauranear = false
+								pcall(function()
+									if origC0 == nil then
+										origC0 = cam.Viewmodel.RightHand.RightWrist.C0
+									end
+									if cam.Viewmodel.RightHand.RightWrist.C0 ~= origC0 then
+										pcall(function()
+											killauracurrentanim:Cancel()
+										end)
+										killauracurrentanim = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(0.1), {C0 = origC0})
+										killauracurrentanim:Play()
+									end
+								end)
+							end
+							targetinfo.UpdateInfo(targettable, targetsize)
+						end
+					until (not Killaura["Enabled"])
+				end)
+            else
+				RunLoops:UnbindFromHeartbeat("Killaura") 
+                killauranear = false
+				for i,v in pairs(killauraboxes) do 
+					v.Adornee = nil
+				end
+				if killauraaimcirclepart then 
+					killauraaimcirclepart.Parent = nil
+				end
+				if killaurarangecirclepart then 
+					killaurarangecirclepart.Parent = nil
+				end
+				if killauraparticlepart then 
+					killauraparticlepart.Parent = nil
+				end
+                bedwars["ViewmodelController"]["playAnimation"] = oldplay
+                bedwars["SoundManager"]["playSound"] = oldsound
+                oldplay = nil
+				targetinfo.UpdateInfo({}, 0)
+                pcall(function()
+					if entity.isAlive then
+						local Root = entity.character.HumanoidRootPart
+						if Root then
+							local Neck = Root.Parent.Head.Neck
+							if orig and orig2 then 
+								Neck.C0 = CFrame.new(orig)
+								Root.Parent.LowerTorso.Root.C0 = CFrame.new(orig2)
+							end
+						end
+					end
+                    if origC0 == nil then
+                        origC0 = cam.Viewmodel.RightHand.RightWrist.C0
+                    end
+                    if cam.Viewmodel.RightHand.RightWrist.C0 ~= origC0 then
+						pcall(function()
+							killauracurrentanim:Cancel()
+						end)
+						killauracurrentanim = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(0.1), {C0 = origC0})
+						killauracurrentanim:Play()
+                    end
+                end)
+            end
+        end,
+        ["HoverText"] = "Attack players around you\nwithout aiming at them."
+    })
+    killauratargetframe = Killaura.CreateTargetWindow({})
+	local sortmethods = {"Distance"}
+	for i,v in pairs(killaurasortmethods) do if i ~= "Distance" then table.insert(sortmethods, i) end end
+	killaurasortmethod = Killaura.CreateDropdown({
+		["Name"] = "Sort",
+		["Function"] = function() end,
+		["List"] = sortmethods
+	})
+    killaurarange = Killaura.CreateSlider({
+        ["Name"] = "Attack range",
+        ["Min"] = 1,
+        ["Max"] = 18,
+        ["Function"] = function(val) 
+			if killaurarangecirclepart then 
+				killaurarangecirclepart.Size = Vector3.new(val * 0.7, 0.01, val * 0.7)
+			end
+		end, 
+        ["Default"] = 18
+    })
+    killauraangle = Killaura.CreateSlider({
+        ["Name"] = "Max angle",
+        ["Min"] = 1,
+        ["Max"] = 360,
+        ["Function"] = function(val) end,
+        ["Default"] = 360
+    })
+  --[[  killauratargets = Killaura.CreateSlider({
+        ["Name"] = "Max targets",
+        ["Min"] = 1,
+        ["Max"] = 10,
+        ["Function"] = function(val) end,
+        ["Default"] = 10
+    })]]
+    killauraanimmethod = Killaura.CreateDropdown({
+        ["Name"] = "Animation", 
+        ["List"] = {"Normal", "Slow", "New", "Vertical Spin", "Exhibition", "Exhibition Old"},
+        ["Function"] = function(val) end
+    })
+    killauramouse = Killaura.CreateToggle({
+        ["Name"] = "Require mouse down",
+        ["Function"] = function() end,
+		["HoverText"] = "Only attacks when left click is held.",
+        ["Default"] = false
+    })
+    killauragui = Killaura.CreateToggle({
+        ["Name"] = "GUI Check",
+        ["Function"] = function() end,
+		["HoverText"] = "Attacks when you are not in a GUI."
+    })
+    killauratarget = Killaura.CreateToggle({
+        ["Name"] = "Show target",
+        ["Function"] = function(callback) 
+			if killauratargethighlight["Object"] then 
+				killauratargethighlight["Object"].Visible = callback
+			end
+		end,
+		["HoverText"] = "Shows a red box over the opponent."
+    })
+	killauratargethighlight = Killaura.CreateToggle({
+		["Name"] = "Use New Highlight",
+		["Function"] = function(callback) 
+			for i,v in pairs(killauraboxes) do 
+				v:Remove()
+			end
+			for i = 1, 10 do 
+				local killaurabox
+				if callback then 
+					killaurabox = Instance.new("Highlight")
+					killaurabox.FillTransparency = 0.5
+					killaurabox.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+					killaurabox.OutlineTransparency = 1
+					killaurabox.Parent = GuiLibrary["MainGui"]
+				else
+					killaurabox = Instance.new("BoxHandleAdornment")
+					killaurabox.Transparency = 0.5
+					killaurabox.Color3 = Color3.fromHSV(killauracolor["Hue"], killauracolor["Sat"], killauracolor["Value"])
+					killaurabox.Adornee = nil
+					killaurabox.AlwaysOnTop = true
+					killaurabox.Size = Vector3.new(3, 6, 3)
+					killaurabox.ZIndex = 11
+					killaurabox.Parent = GuiLibrary["MainGui"]
+				end
+				killauraboxes[i] = killaurabox
+			end
+		end
+	})
+	killauratargethighlight["Object"].BorderSizePixel = 0
+	killauratargethighlight["Object"].BackgroundTransparency = 0
+	killauratargethighlight["Object"].BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+	killauratargethighlight["Object"].Visible = false
+	killauracolor = Killaura.CreateColorSlider({
+		["Name"] = "Target Color",
+		["Function"] = function(hue, sat, val) 
+			for i,v in pairs(killauraboxes) do 
+				v[(killauratargethighlight["Enabled"] and "FillColor" or "Color3")] = Color3.fromHSV(hue, sat, val)
+			end
+			if killauraaimcirclepart then 
+				killauraaimcirclepart.Color = Color3.fromHSV(hue, sat, val)
+			end
+			if killaurarangecirclepart then 
+				killaurarangecirclepart.Color = Color3.fromHSV(hue, sat, val)
+			end
+		end,
+		["Default"] = 1
+	})
+	for i = 1, 10 do 
+		local killaurabox = Instance.new("BoxHandleAdornment")
+		killaurabox.Transparency = 0.5
+		killaurabox.Color3 = Color3.fromHSV(killauracolor["Hue"], killauracolor["Sat"], killauracolor["Value"])
+		killaurabox.Adornee = nil
+		killaurabox.AlwaysOnTop = true
+		killaurabox.Size = Vector3.new(3, 6, 3)
+		killaurabox.ZIndex = 11
+		killaurabox.Parent = GuiLibrary["MainGui"]
+		killauraboxes[i] = killaurabox
+	end
+    killauracframe = Killaura.CreateToggle({
+        ["Name"] = "Face target",
+        ["Function"] = function() end,
+		["HoverText"] = "Makes your character face the opponent."
+    })
+	killaurarangecircle = Killaura.CreateToggle({
+		["Name"] = "Range Visualizer",
+		["Function"] = function(callback)
+			if callback then 
+				killaurarangecirclepart = Instance.new("MeshPart")
+				killaurarangecirclepart.MeshId = "rbxassetid://3726303797"
+				killaurarangecirclepart.Color = Color3.fromHSV(killauracolor["Hue"], killauracolor["Sat"], killauracolor["Value"])
+				killaurarangecirclepart.CanCollide = false
+				killaurarangecirclepart.Anchored = true
+				killaurarangecirclepart.Material = Enum.Material.Neon
+				killaurarangecirclepart.Size = Vector3.new(killaurarange["Value"] * 0.7, 0.01, killaurarange["Value"] * 0.7)
+				killaurarangecirclepart.Parent = cam
+				bedwars["QueryUtil"]:setQueryIgnored(killaurarangecirclepart, true)
+			else
+				if killaurarangecirclepart then 
+					killaurarangecirclepart:Destroy()
+					killaurarangecirclepart = nil
+				end
+			end
+		end
+	})
+	killauraaimcircle = Killaura.CreateToggle({
+		["Name"] = "Aim Visualizer",
+		["Function"] = function(callback)
+			if callback then 
+				killauraaimcirclepart = Instance.new("Part")
+				killauraaimcirclepart.Shape = Enum.PartType.Ball
+				killauraaimcirclepart.Color = Color3.fromHSV(killauracolor["Hue"], killauracolor["Sat"], killauracolor["Value"])
+				killauraaimcirclepart.CanCollide = false
+				killauraaimcirclepart.Anchored = true
+				killauraaimcirclepart.Material = Enum.Material.Neon
+				killauraaimcirclepart.Size = Vector3.new(0.5, 0.5, 0.5)
+				killauraaimcirclepart.Parent = cam
+			else
+				if killauraaimcirclepart then 
+					killauraaimcirclepart:Destroy()
+					killauraaimcirclepart = nil
+				end
+			end
+		end
+	})
+	killauraparticle = Killaura.CreateToggle({
+		["Name"] = "Crit Particle",
+		["Function"] = function(callback)
+			if callback then 
+				killauraparticlepart = Instance.new("Part")
+				killauraparticlepart.Transparency = 1
+				killauraparticlepart.CanCollide = false
+				killauraparticlepart.Anchored = true
+				killauraparticlepart.Size = Vector3.new(3, 6, 3)
+				killauraparticlepart.Parent = cam
+				local particle = Instance.new("ParticleEmitter")
+				particle.Lifetime = NumberRange.new(0.5)
+				particle.Rate = 500
+				particle.Speed = NumberRange.new(0)
+				particle.RotSpeed = NumberRange.new(180)
+				particle.Enabled = true
+				particle.Size = NumberSequence.new(0.3)
+				particle.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(67, 10, 255)), ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 98, 255))})
+				particle.Parent = killauraparticlepart
+			else
+				if killauraparticlepart then 
+					killauraparticlepart:Destroy()
+					killauraparticlepart = nil
+				end
+			end
+		end
+	})
+    killaurasound = Killaura.CreateToggle({
+        ["Name"] = "No Swing Sound",
+        ["Function"] = function() end,
+		["HoverText"] = "Removes the swinging sound."
+    })
+    killauraswing = Killaura.CreateToggle({
+        ["Name"] = "No Swing",
+        ["Function"] = function() end,
+		["HoverText"] = "Removes the swinging animation."
+    })
+    killaurahandcheck = Killaura.CreateToggle({
+        ["Name"] = "Limit to items",
+        ["Function"] = function() end,
+		["HoverText"] = "Only attacks when your sword is held."
+    })
+    killaurabaguette = Killaura.CreateToggle({
+        ["Name"] = "Baguette Aura",
+        ["Function"] = function() end,
+		["HoverText"] = "Uses the baguette instead of the sword."
+    })
+    killauraanimation = Killaura.CreateToggle({
+        ["Name"] = "Custom Animation",
+        ["Function"] = function() end,
+		["HoverText"] = "Uses a custom animation for swinging"
+    })
+	if WhitelistFunctions:CheckPlayerType(lplr) ~= "DEFAULT" then
+		killauranovape = Killaura.CreateToggle({
+			["Name"] = "No Vape",
+			["Function"] = function() end,
+			["HoverText"] = "no hit vape user"
+		})
+	end
 end)
 
 runcode(function()
@@ -5187,7 +5807,7 @@ runcode(function()
 				task.spawn(function()
 					repeat
 						task.wait()
-						if entity.isAlive and (not bedwars["ClientStoreHandler"]:getState().Inventory.opened) and (uis:IsKeyDown(Enum.KeyCode.Q) or uis:IsKeyDown(Enum.KeyCode.Backspace)) and bettergetfocus() == nil then
+						if entity.isAlive and (not bedwars["ClientStoreHandler"]:getState().Inventory.opened) and (uis:IsKeyDown(Enum.KeyCode.Q) or uis:IsKeyDown(Enum.KeyCode.Backspace)) and game:GetService("UserInputService"):GetFocusedTextBox() == nil then
 							task.spawn(bedwars["DropItem"])
 						end
 					until (not FastDrop["Enabled"])
@@ -6268,17 +6888,17 @@ runcode(function()
 				local olddir
 				RunLoops:BindToHeartbeat("Speed", 1, function(delta)
 					if entity.isAlive and (GuiLibrary["ObjectsThatCanBeSaved"]["Lobby CheckToggle"]["Api"]["Enabled"] == false or matchState ~= 0) then
-						if speedanimation["Enabled"] then
-							for i,v in pairs(entity.character.Humanoid:GetPlayingAnimationTracks()) do
-								if v.Name == "WalkAnim" or v.Name == "RunAnim" then
-									v:AdjustSpeed(entity.character.Humanoid.WalkSpeed / 16)
-								end
-							end
-						end
 						local allowedvelo = (20 * getSpeedMultiplier())
 						local jumpcheck = killauranear and Killaura["Enabled"] and (not Scaffold["Enabled"])
 						if speedmode["Value"] ~= "Normal" then
 							if longjump["Enabled"] then return end
+							if speedanimation["Enabled"] then
+								for i,v in pairs(entity.character.Humanoid:GetPlayingAnimationTracks()) do
+									if v.Name == "WalkAnim" or v.Name == "RunAnim" then
+										v:AdjustSpeed(entity.character.Humanoid.WalkSpeed / 16)
+									end
+								end
+							end
 							local newpos = Vector3.zero
 							if (not spidergoinup) and (not GuiLibrary["ObjectsThatCanBeSaved"]["FlyOptionsButton"]["Api"]["Enabled"]) then
 								if longjump["Enabled"] then 
@@ -6485,20 +7105,20 @@ runcode(function()
 				olddeflate = bedwars["BalloonController"]["deflateBalloon"]
 				bedwars["BalloonController"]["deflateBalloon"] = function() end
 				flypress = uis.InputBegan:Connect(function(input1)
-					if flyupanddown["Enabled"] and bettergetfocus() == nil then
-						if input1.KeyCode == Enum.KeyCode.Space then
+					if flyupanddown["Enabled"] and game:GetService("UserInputService"):GetFocusedTextBox() == nil then
+						if input1.KeyCode == Enum.KeyCode.Space or input1.KeyCode == Enum.KeyCode.ButtonA then
 							flyup = true
 						end
-						if input1.KeyCode == Enum.KeyCode.LeftShift then
+						if input1.KeyCode == Enum.KeyCode.LeftShift or input1.KeyCode == Enum.KeyCode.ButtonL2 then
 							flydown = true
 						end
 					end
 				end)
 				flyendpress = uis.InputEnded:Connect(function(input1)
-					if input1.KeyCode == Enum.KeyCode.Space then
+					if input1.KeyCode == Enum.KeyCode.Space or input1.KeyCode == Enum.KeyCode.ButtonA then
 						flyup = false
 					end
-					if input1.KeyCode == Enum.KeyCode.LeftShift then
+					if input1.KeyCode == Enum.KeyCode.LeftShift or input1.KeyCode == Enum.KeyCode.ButtonL2 then
 						flydown = false
 					end
 				end)
@@ -6598,7 +7218,6 @@ runcode(function()
 							entity.character.HumanoidRootPart.CFrame = entity.character.HumanoidRootPart.CFrame + flypos2
 						end
 						flyvelo = flypos + Vector3.new(0, mass + (flyup and flyverticalspeed["Value"] or 0) + (flydown and -flyverticalspeed["Value"] or 0), 0)
-						
 					end
 				end)
 			else
@@ -6868,7 +7487,7 @@ runcode(function()
 					return 
 				end
 				flypress = uis.InputBegan:Connect(function(input1)
-					if flyupanddown["Enabled"] and bettergetfocus() == nil then
+					if flyupanddown["Enabled"] and game:GetService("UserInputService"):GetFocusedTextBox() == nil then
 						if input1.KeyCode == Enum.KeyCode.Space or input1.KeyCode == Enum.KeyCode.ButtonA then
 							flyup = true
 						end
@@ -6943,7 +7562,7 @@ runcode(function()
 						end
 						allowed = 1
 						local mass = (entity.character.HumanoidRootPart:GetMass() - 1.4) * (delta * 100)
-						local flypos = entity.character.Humanoid.MoveDirection * 16
+						local flypos = entity.character.Humanoid.MoveDirection * 20
 						entity.character.HumanoidRootPart.Transparency = 1
 						entity.character.HumanoidRootPart.Velocity = flypos + (Vector3.new(0, mass + (flyup and flyverticalspeed["Value"] or 0) + (flydown and -flyverticalspeed["Value"] or 0), 0) * allowed)
 						flyvelo = flypos + Vector3.new(0, mass + (flyup and flyverticalspeed["Value"] or 0) + (flydown and -flyverticalspeed["Value"] or 0), 0)
@@ -6992,10 +7611,10 @@ runcode(function()
 		["HoverText"] = "Makes you go zoom"
 	})
 	flydelay = fly.CreateSlider({
-		["Name"] = "Delay",
+		["Name"] = "Land Delay",
 		["Min"] = 1,
-		["Max"] = 125,
-		["Default"] = 125,
+		["Max"] = 150,
+		["Default"] = 150,
 		["Function"] = function() end,
 		["Double"] = 100
 	})
@@ -7012,6 +7631,7 @@ runcode(function()
 		["Default"] = true
 	})
 end)
+
 runcode(function()
 	local scaffoldtext = Instance.new("TextLabel")
 	scaffoldtext.Font = Enum.Font.SourceSans
@@ -7106,7 +7726,7 @@ runcode(function()
 							scaffoldtext.Text = (woolamount and tostring(woolamount) or "0")
 							scaffoldtext.TextColor3 = woolamount and (woolamount >= 128 and Color3.fromRGB(9, 255, 198) or woolamount >= 64 and Color3.fromRGB(255, 249, 18)) or Color3.fromRGB(255, 0, 0)
 							if not wool then continue end
-							local towering = ScaffoldTower["Enabled"] and uis:IsKeyDown(Enum.KeyCode.Space) and bettergetfocus() == nil
+							local towering = ScaffoldTower["Enabled"] and uis:IsKeyDown(Enum.KeyCode.Space) and game:GetService("UserInputService"):GetFocusedTextBox() == nil
 							if towering then
 								if (not scaffoldstopmotionval) and ScaffoldStopMotion["Enabled"] then
 									scaffoldstopmotionval = true
@@ -7120,7 +7740,7 @@ runcode(function()
 								scaffoldstopmotionval = false
 							end
 							for i = 1, ScaffoldExpand["Value"] do
-								local newpos = getScaffold((entity.character.Head.Position + ((scaffoldstopmotionval and Vector3.zero or entity.character.Humanoid.MoveDirection) * (i * 3.5))) + Vector3.new(0, -math.floor(entity.character.Humanoid.HipHeight * (uis:IsKeyDown(Enum.KeyCode.LeftShift) and ScaffoldDownwards["Enabled"] and 5 or 3) * (lplr.Character:GetAttribute("Transparency") and 1.1 or 1)), 0), ScaffoldDiagonal["Enabled"] and (entity.character.HumanoidRootPart.Velocity.Y < 2))
+								local newpos = getScaffold((entity.character.HumanoidRootPart.Position + ((scaffoldstopmotionval and Vector3.zero or entity.character.Humanoid.MoveDirection) * (i * 3.5))) + Vector3.new(0, -((entity.character.HumanoidRootPart.Size.Y / 2) + entity.character.Humanoid.HipHeight + (uis:IsKeyDown(Enum.KeyCode.LeftShift) and ScaffoldDownwards["Enabled"] and 4.5 or 1.5))), 0)
 								newpos = Vector3.new(newpos.X, newpos.Y - (towering and 4 or 0), newpos.Z)
 								if newpos ~= oldpos then
 									if not checkblocks(newpos) then
@@ -8296,7 +8916,7 @@ runcode(function()
 		["HoverText"] = "Allows you to access tiered items early."
 	})
 end)
-		
+
 runcode(function()
 	local antivoidpart
 	local antivoidconnection
@@ -8392,7 +9012,587 @@ runcode(function()
 		["HoverText"] = "Switches to balloons in hotbar and inflates them."
 	})
 end)
-		
+
+runcode(function()
+	local AnticheatBypassTransparent = {["Enabled"] = false}
+	local AnticheatBypassAlternate = {["Enabled"] = false}
+	local AnticheatBypassNotification = {["Enabled"] = false}
+	local AnticheatBypassAnimation = {["Enabled"] = true}
+	local AnticheatBypassAnimationCustom = {["Value"] = ""}
+	local AnticheatBypassDisguise = {["Enabled"] = false}
+	local AnticheatBypassDisguiseCustom = {["Value"] = ""}
+	local AnticheatBypassArrowDodge = {["Enabled"] = false}
+	local AnticheatBypassAutoConfig = {["Enabled"] = false}
+	local AnticheatBypassAutoConfigBig = {["Enabled"] = false}
+	local AnticheatBypassAutoConfigSpeed = {["Value"] = 54}
+	local AnticheatBypassAutoConfigSpeed2 = {["Value"] = 54}
+	local AnticheatBypassTPSpeed = {["Value"] = 13}
+	local AnticheatBypassTPLerp = {["Value"] = 50}
+	local clone
+	local changed = false
+	local justteleported = false
+	local anticheatconnection
+	local anticheatconnection2
+	local playedanim = ""
+	local hip
+
+	local function finishcframe(cframe)
+		return shared.VapeOverrideAnticheatBypassCFrame and shared.VapeOverrideAnticheatBypassCFrame(cframe) or cframe
+	end
+
+	local function check()
+		if clone and oldcloneroot and (oldcloneroot.Position - clone.Position).magnitude >= (AnticheatBypassNumbers.TPCheck * getSpeedMultiplier()) then
+			clone.CFrame = oldcloneroot.CFrame
+		end
+	end
+
+	local clonesuccess = false
+	local doing = false
+	local function disablestuff()
+		if uninjectflag then return end
+		repeat task.wait() until entity.isAlive
+		if not AnticheatBypass["Enabled"] then doing = false return end
+		oldcloneroot = entity.character.HumanoidRootPart
+		lplr.Character.Parent = game
+		clone = oldcloneroot:Clone()
+		clone.Parent = lplr.Character
+		oldcloneroot.Parent = cam
+		bedwars["QueryUtil"]:setQueryIgnored(oldcloneroot, true)
+		oldcloneroot.Transparency = AnticheatBypassTransparent["Enabled"] and 1 or 0
+		clone.CFrame = oldcloneroot.CFrame
+		lplr.Character.PrimaryPart = clone
+		lplr.Character.Parent = workspace
+		for i,v in pairs(lplr.Character:GetDescendants()) do 
+			if v:IsA("Weld") or v:IsA("Motor6D") then 
+				if v.Part0 == oldcloneroot then v.Part0 = clone end
+				if v.Part1 == oldcloneroot then v.Part1 = clone end
+			end
+			if v:IsA("BodyVelocity") then 
+				v:Destroy()
+			end
+		end
+		for i,v in pairs(oldcloneroot:GetChildren()) do 
+			if v:IsA("BodyVelocity") then 
+				v:Destroy()
+			end
+		end
+		if hip then 
+			lplr.Character.Humanoid.HipHeight = hip
+		end
+		hip = lplr.Character.Humanoid.HipHeight
+		local bodyvelo = Instance.new("BodyVelocity")
+		bodyvelo.MaxForce = Vector3.new(0, 9e9, 0)
+		bodyvelo.Velocity = Vector3.zero
+		bodyvelo.Parent = oldcloneroot
+		pcall(function()
+			RunLoops:UnbindFromHeartbeat("AnticheatBypass")
+		end)
+		local oldseat 
+		local oldseattab = Instance.new("BindableEvent")
+		RunLoops:BindToHeartbeat("AnticheatBypass", 1, function()
+			if oldcloneroot and clone then
+				oldcloneroot.AssemblyAngularVelocity = clone.AssemblyAngularVelocity
+				if disabletpcheck then
+					oldcloneroot.Velocity = clone.Velocity
+				else
+					local sit = entity.character.Humanoid.Sit
+					if sit ~= oldseat then 
+						if sit then 
+							for i,v in pairs(workspace:GetDescendants()) do 
+								if not v:IsA("Seat") then continue end
+								local weld = v:FindFirstChild("SeatWeld")
+								if weld and weld.Part1 == oldcloneroot then 
+									weld.Part1 = clone
+									pcall(function()
+										for i,v in pairs(getconnections(v:GetPropertyChangedSignal("Occupant"))) do
+											local newfunc = debug.getupvalue(debug.getupvalue(v.Function, 1), 3) 
+											debug.setupvalue(newfunc, 4, {
+												GetPropertyChangedSignal = function(self, prop)
+													return oldseattab.Event
+												end
+											})
+											newfunc()
+										end
+									end)
+								end
+							end
+						else
+							oldseattab:Fire(false)
+						end
+						oldseat = sit	
+					end
+					local targetvelo = (Vector3.new(clone.Position.X, 0, clone.Position.Z) - Vector3.new(oldcloneroot.Position.X, 0, oldcloneroot.Position.Z))
+					local speed = ((sit or bedwars["HangGliderController"].hangGliderActive) and targetvelo.Magnitude or 20 * getSpeedMultiplier())
+					targetvelo = (targetvelo.Unit == targetvelo.Unit and targetvelo.Unit or Vector3.zero) * speed
+					bodyvelo.Velocity = Vector3.new(0, clone.Velocity.Y, 0)
+					oldcloneroot.Velocity = Vector3.new(math.clamp(targetvelo.X, -speed, speed), clone.Velocity.Y, math.clamp(targetvelo.Z, -speed, speed))
+				end
+			end
+		end)
+		local lagbacknum = 0
+		local lagbackcurrent = false
+		local lagbacktime = 0
+		local lagbackchanged = false
+		local lagbacknotification = false
+		local amountoftimes = 0
+		local lastseat
+		clonesuccess = true
+		local pinglist = {}
+		local fpslist = {}
+
+		local function getaverageframerate()
+			local frames = 0
+			for i,v in pairs(fpslist) do 
+				frames = frames + v
+			end
+			return #fpslist > 0 and (frames / (60 * #fpslist)) <= 1.2 or #fpslist <= 0 or AnticheatBypassAlternate["Enabled"]
+		end
+
+		local function didpingspike()
+			local currentpingcheck = pinglist[1] or math.floor(tonumber(game:GetService("Stats"):FindFirstChild("PerformanceStats").Ping:GetValue()))
+			for i,v in pairs(fpslist) do 
+				print("anticheatbypass fps ["..i.."]: "..v)
+				if v < 40 then 
+					return v.." fps"
+				end
+			end
+			for i,v in pairs(pinglist) do 
+				print("anticheatbypass ping ["..i.."]: "..v)
+				if v ~= currentpingcheck and math.abs(v - currentpingcheck) >= 100 then 
+					return currentpingcheck.." => "..v.." ping"
+				else
+					currentpingcheck = v
+				end
+			end
+			return nil
+		end
+
+		local function notlasso()
+			for i,v in pairs(collectionservice:GetTagged("LassoHooked")) do 
+				if v == lplr.Character then 
+					return false
+				end
+			end
+			return true
+		end
+
+		doing = false
+		allowspeed = true
+		task.spawn(function()
+			repeat
+				if (not AnticheatBypass["Enabled"]) then break end
+				local ping = math.floor(tonumber(game:GetService("Stats"):FindFirstChild("PerformanceStats").Ping:GetValue()))
+				local fps = math.floor(1 / game:GetService("RunService").RenderStepped:Wait())
+				if #pinglist >= 10 then 
+					table.remove(pinglist, 1)
+				end
+				if #fpslist >= 10 then 
+					table.remove(fpslist, 1)
+				end
+				table.insert(pinglist, ping)
+				table.insert(fpslist, fps)
+				task.wait(1)
+			until (not AnticheatBypass["Enabled"])
+		end)
+		if anticheatconnection2 then anticheatconnection2:Disconnect() end
+		anticheatconnection2 = lplr:GetAttributeChangedSignal("LastTeleported"):Connect(function()
+			if not AnticheatBypass["Enabled"] then if anticheatconnection2 then anticheatconnection2:Disconnect() end end
+			if not (clone and oldcloneroot) then return end
+			clone.CFrame = oldcloneroot.CFrame
+		end)
+		shared.VapeRealCharacter = {
+			Humanoid = entity.character.Humanoid,
+			Head = entity.character.Head,
+			HumanoidRootPart = oldcloneroot
+		}
+		if shared.VapeOverrideAnticheatBypassPre then 
+			shared.VapeOverrideAnticheatBypassPre(lplr.Character)
+		end
+		repeat
+			task.wait()
+			if entity.isAlive then
+				local oldroot = oldcloneroot
+				if oldroot then
+					local cloneroot = clone
+					if cloneroot then
+						if oldroot.Parent ~= nil and (not networkownerfunc(oldroot)) then
+							if amountoftimes ~= 0 then
+								amountoftimes = 0
+							end
+							if not lagbackchanged then
+								lagbackchanged = true
+								lagbacktime = tick()
+								task.spawn(function()
+									local pingspike = didpingspike() 
+									if pingspike then
+										if AnticheatBypassNotification["Enabled"] then
+											createwarning("AnticheatBypass", "Lagspike Detected : "..pingspike, 10)
+										end
+									else
+										if matchState ~= 2 and notlasso() then
+											lagbacks = lagbacks + 1
+										end
+									end
+									task.spawn(function()
+										if AnticheatBypass["Enabled"] then
+											AnticheatBypass["ToggleButton"](false)
+										end
+										local oldclonecharcheck = lplr.Character
+										repeat task.wait() until lplr.Character == nil or lplr.Character.Parent == nil or oldclonecharcheck ~= lplr.Character or networkownerfunc(oldroot)
+										if AnticheatBypass["Enabled"] == false then
+											AnticheatBypass["ToggleButton"](false)
+										end
+									end)
+								end)
+							end
+							if (tick() - lagbacktime) >= 10 and (not lagbacknotification) then
+								lagbacknotification = true
+								createwarning("AnticheatBypass", "You have been lagbacked for a awfully long time", 10)
+							end
+							cloneroot.Velocity = Vector3.zero
+							oldroot.Velocity = Vector3.zero
+							cloneroot.CFrame = oldroot.CFrame
+						else
+							lagbackchanged = false
+							lagbacknotification = false
+							if not shared.VapeOverrideAnticheatBypass then
+								if entity.character.Humanoid.Sit ~= true then
+									anticheatfunnyyes = true 
+									local frameratecheck = getaverageframerate()
+									local framerate = AnticheatBypassNumbers.TPSpeed <= 0.3 and frameratecheck and -0.22 or 0
+									local framerate2 = AnticheatBypassNumbers.TPSpeed <= 0.3 and frameratecheck and -0.01 or 0
+									framerate = math.floor((AnticheatBypassNumbers.TPLerp + framerate) * 100) / 100
+									framerate2 = math.floor((AnticheatBypassNumbers.TPSpeed + framerate2) * 100) / 100
+									for i = 1, 2 do 
+										check()
+										task.wait(i % 2 == 0 and 0.01 or 0.02)
+										check()
+										if oldroot and cloneroot then
+											anticheatfunnyyes = false
+											if (oldroot.CFrame.p - cloneroot.CFrame.p).magnitude >= 0.01 then
+												if (Vector3.new(0, oldroot.CFrame.p.Y, 0) - Vector3.new(0, cloneroot.CFrame.p.Y, 0)).magnitude <= 1 then
+													oldroot.CFrame = finishcframe(oldroot.CFrame:lerp(addvectortocframe2(cloneroot.CFrame, oldroot.CFrame.p.Y), framerate))
+												else
+													oldroot.CFrame = finishcframe(oldroot.CFrame:lerp(cloneroot.CFrame, framerate))
+												end
+											end
+										end
+										check()
+									end
+									check()
+									task.wait(combatcheck and AnticheatBypassCombatCheck["Enabled"] and AnticheatBypassNumbers.TPCombat or framerate2)
+									check()
+									if oldroot and cloneroot then
+										if (oldroot.CFrame.p - cloneroot.CFrame.p).magnitude >= 0.01 then
+											if (Vector3.new(0, oldroot.CFrame.p.Y, 0) - Vector3.new(0, cloneroot.CFrame.p.Y, 0)).magnitude <= 1 then
+												oldroot.CFrame = finishcframe(addvectortocframe2(cloneroot.CFrame, oldroot.CFrame.p.Y))
+											else
+												oldroot.CFrame = finishcframe(cloneroot.CFrame)
+											end
+										end
+									end
+									check()
+								else
+									if oldroot and cloneroot then
+										oldroot.CFrame = cloneroot.CFrame
+									end
+								end
+							end
+						end
+					end
+				end
+			end
+		until AnticheatBypass["Enabled"] == false or oldcloneroot == nil or oldcloneroot.Parent == nil 
+	end
+
+	local spawncoro
+	local function anticheatbypassenable()
+		task.spawn(function()
+			if spawncoro then return end
+			spawncoro = true
+			allowspeed = false
+			shared.VapeRealCharacter = nil
+			repeat task.wait() until entity.isAlive
+			task.wait(0.4)
+			lplr.Character:WaitForChild("Humanoid", 10)
+			lplr.Character:WaitForChild("LeftHand", 10)
+			lplr.Character:WaitForChild("RightHand", 10)
+			lplr.Character:WaitForChild("LeftFoot", 10)
+			lplr.Character:WaitForChild("RightFoot", 10)
+			lplr.Character:WaitForChild("LeftLowerArm", 10)
+			lplr.Character:WaitForChild("RightLowerArm", 10)
+			lplr.Character:WaitForChild("LeftUpperArm", 10)
+			lplr.Character:WaitForChild("RightUpperArm", 10)
+			lplr.Character:WaitForChild("LeftLowerLeg", 10)
+			lplr.Character:WaitForChild("RightLowerLeg", 10)
+			lplr.Character:WaitForChild("LeftUpperLeg", 10)
+			lplr.Character:WaitForChild("RightUpperLeg", 10)
+			lplr.Character:WaitForChild("UpperTorso", 10)
+			lplr.Character:WaitForChild("LowerTorso", 10)
+			local root = lplr.Character:WaitForChild("HumanoidRootPart", 20)
+			local head = lplr.Character:WaitForChild("Head", 20)
+			task.wait(0.4)
+			spawncoro = false
+			if root ~= nil and head ~= nil then
+				task.spawn(disablestuff)
+			else
+				createwarning("AnticheatBypass", "ur root / head no load L", 30)
+			end
+		end)
+		anticheatconnection = lplr.CharacterAdded:Connect(function(char)
+			task.spawn(function()
+				if spawncoro then return end
+				spawncoro = true
+				allowspeed = false
+				shared.VapeRealCharacter = nil
+				repeat task.wait() until entity.isAlive
+				task.wait(0.4)
+				char:WaitForChild("Humanoid", 10)
+				char:WaitForChild("LeftHand", 10)
+				char:WaitForChild("RightHand", 10)
+				char:WaitForChild("LeftFoot", 10)
+				char:WaitForChild("RightFoot", 10)
+				char:WaitForChild("LeftLowerArm", 10)
+				char:WaitForChild("RightLowerArm", 10)
+				char:WaitForChild("LeftUpperArm", 10)
+				char:WaitForChild("RightUpperArm", 10)
+				char:WaitForChild("LeftLowerLeg", 10)
+				char:WaitForChild("RightLowerLeg", 10)
+				char:WaitForChild("LeftUpperLeg", 10)
+				char:WaitForChild("RightUpperLeg", 10)
+				char:WaitForChild("UpperTorso", 10)
+				char:WaitForChild("LowerTorso", 10)
+				local root = char:WaitForChild("HumanoidRootPart", 20)
+				local head = char:WaitForChild("Head", 20)
+				task.wait(0.4)
+				spawncoro = false
+				if root ~= nil and head ~= nil then
+					task.spawn(disablestuff)
+				else
+					createwarning("AnticheatBypass", "ur root / head no load L", 30)
+				end
+			end)
+		end)
+	end
+
+	AnticheatBypass = GuiLibrary["ObjectsThatCanBeSaved"]["UtilityWindow"]["Api"].CreateOptionsButton({
+		["Name"] = "AnticheatBypass",
+		["Function"] = function(callback)
+			if callback then
+				task.spawn(function()
+					task.spawn(function()
+						repeat task.wait() until shared.VapeFullyLoaded
+						if AnticheatBypass["Enabled"] then
+							if not GuiLibrary["ObjectsThatCanBeSaved"]["FlyBoost SpeedToggle"]["Api"]["Enabled"] then 
+								GuiLibrary["ObjectsThatCanBeSaved"]["FlyBoost SpeedToggle"]["Api"]["ToggleButton"](true)
+							end
+							if AutoReport["Enabled"] == false then
+								AutoReport["ToggleButton"](false)
+							end
+							if AutoReportV2["Enabled"] == false then
+								AutoReportV2["ToggleButton"](false)
+							end
+						end
+					end)
+				--	GuiLibrary["ObjectsThatCanBeSaved"]["SpeedSpeedSlider"]["Api"]["SetValue"](74)
+				--	GuiLibrary["ObjectsThatCanBeSaved"]["SpeedModeDropdown"]["Api"]["SetValue"]("Heatseeker")
+				--	GuiLibrary["ObjectsThatCanBeSaved"]["FlySpeedSlider"]["Api"]["SetValue"](74)
+				--  GuiLibrary["ObjectsThatCanBeSaved"]["FlyModeDropdown"]["Api"]["SetValue"]("Heatseeker")
+				end)
+			--	anticheatbypassenable()
+			else
+				allowspeed = true
+				if anticheatconnection then 
+					anticheatconnection:Disconnect()
+				end
+				if anticheatconnection2 then anticheatconnection2:Disconnect() end
+				pcall(function() RunLoops:UnbindFromHeartbeat("AnticheatBypass") end)
+				if clonesuccess and oldcloneroot and clone and lplr.Character.Parent == workspace and oldcloneroot.Parent ~= nil then 
+					lplr.Character.Parent = game
+					oldcloneroot.Parent = lplr.Character
+					lplr.Character.PrimaryPart = oldcloneroot
+					lplr.Character.Parent = workspace
+					oldcloneroot.CanCollide = true
+					oldcloneroot.Transparency = 1
+					for i,v in pairs(lplr.Character:GetDescendants()) do 
+						if v:IsA("Weld") or v:IsA("Motor6D") then 
+							if v.Part0 == clone then v.Part0 = oldcloneroot end
+							if v.Part1 == clone then v.Part1 = oldcloneroot end
+						end
+						if v:IsA("BodyVelocity") then 
+							v:Destroy()
+						end
+					end
+					for i,v in pairs(oldcloneroot:GetChildren()) do 
+						if v:IsA("BodyVelocity") then 
+							v:Destroy()
+						end
+					end
+					lplr.Character.Humanoid.HipHeight = hip or 2
+				end
+				if clone then 
+					clone:Destroy()
+					clone = nil
+				end
+				oldcloneroot = nil
+			end
+		end,
+		["HoverText"] = "Makes speed check more stupid.\n(thank you to MicrowaveOverflow.cpp#7030 for no more clone crap)",
+	})
+	local arrowdodgeconnection
+	local arrowdodgedata
+	
+--[[	AnticheatBypassArrowDodge = AnticheatBypass.CreateToggle({
+		["Name"] = "Arrow Dodge",
+		["Function"] = function(callback)
+			if callback then
+				task.spawn(function()
+					bedwars["ClientHandler"]:WaitFor("ProjectileLaunch"):andThen(function(p6)
+						arrowdodgeconnection = p6:Connect(function(data)
+							if oldchar and clone and AnticheatBypass["Enabled"] and (arrowdodgedata == nil or arrowdodgedata.launchVelocity ~= data.launchVelocity) and entity.isAlive and tostring(data.projectile):find("arrow") then
+								arrowdodgedata = data
+								local projmetatab = bedwars["ProjectileMeta"][tostring(data.projectile)]
+								local prediction = (projmetatab.predictionLifetimeSec or projmetatab.lifetimeSec or 3)
+								local gravity = (projmetatab.gravitationalAcceleration or 196.2)
+								local multigrav = gravity
+								local offsetshootpos = data.position
+								local pos = (oldchar.HumanoidRootPart.Position + Vector3.new(0, 0.8, 0)) 
+								local calculated2 = FindLeadShot(pos, Vector3.zero, (Vector3.zero - data.launchVelocity).magnitude, offsetshootpos, Vector3.zero, multigrav) 
+								local calculated = LaunchDirection(offsetshootpos, pos, (Vector3.zero - data.launchVelocity).magnitude, gravity, false)
+								local initialvelo = calculated--(calculated - offsetshootpos).Unit * launchvelo
+								local initialvelo2 = (calculated2 - offsetshootpos).Unit * (Vector3.zero - data.launchVelocity).magnitude
+								local calculatedvelo = Vector3.new(initialvelo2.X, (initialvelo and initialvelo.Y or initialvelo2.Y), initialvelo2.Z).Unit * (Vector3.zero - data.launchVelocity).magnitude
+								if (calculatedvelo - data.launchVelocity).magnitude <= 20 then 
+									oldchar.HumanoidRootPart.CFrame = oldchar.HumanoidRootPart.CFrame:lerp(clone.HumanoidRootPart.CFrame, 0.6)
+								end
+							end
+						end)
+					end)
+				end)
+			else
+				if arrowdodgeconnection then 
+					arrowdodgeconnection:Disconnect()
+				end
+			end
+		end,
+		["Default"] = true,
+		["HoverText"] = "Dodge arrows (tanqr moment)"
+	})]]
+	AnticheatBypassAutoConfig = AnticheatBypass.CreateToggle({
+		["Name"] = "Auto Config",
+		["Function"] = function(callback) 
+			if AnticheatBypassAutoConfigSpeed["Object"] then 
+				AnticheatBypassAutoConfigSpeed["Object"].Visible = callback
+			end
+			if AnticheatBypassAutoConfigSpeed2["Object"] then 
+				AnticheatBypassAutoConfigSpeed2["Object"].Visible = callback
+			end
+			if AnticheatBypassAutoConfigBig["Object"] then 
+				AnticheatBypassAutoConfigBig["Object"].Visible = callback
+			end
+		end,
+		["Default"] = true
+	})
+	AnticheatBypassAutoConfigSpeed = AnticheatBypass.CreateSlider({
+		["Name"] = "Speed",
+		["Function"] = function() end,
+		["Min"] = 1,
+		["Max"] = GuiLibrary["ObjectsThatCanBeSaved"]["SpeedSpeedSlider"]["Api"]["Max"],
+		["Default"] = GuiLibrary["ObjectsThatCanBeSaved"]["SpeedSpeedSlider"]["Api"]["Default"]
+	})
+	AnticheatBypassAutoConfigSpeed["Object"].BorderSizePixel = 0
+	AnticheatBypassAutoConfigSpeed["Object"].BackgroundTransparency = 0
+	AnticheatBypassAutoConfigSpeed["Object"].BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+	AnticheatBypassAutoConfigSpeed["Object"].Visible = false
+	AnticheatBypassAutoConfigSpeed2 = AnticheatBypass.CreateSlider({
+		["Name"] = "Big Mode Speed",
+		["Function"] = function() end,
+		["Min"] = 1,
+		["Max"] = GuiLibrary["ObjectsThatCanBeSaved"]["SpeedSpeedSlider"]["Api"]["Max"],
+		["Default"] = GuiLibrary["ObjectsThatCanBeSaved"]["SpeedSpeedSlider"]["Api"]["Default"]
+	})
+	AnticheatBypassAutoConfigSpeed2["Object"].BorderSizePixel = 0
+	AnticheatBypassAutoConfigSpeed2["Object"].BackgroundTransparency = 0
+	AnticheatBypassAutoConfigSpeed2["Object"].BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+	AnticheatBypassAutoConfigSpeed2["Object"].Visible = false
+	AnticheatBypassAutoConfigBig = AnticheatBypass.CreateToggle({
+		["Name"] = "Big Mode CFrame",
+		["Function"] = function() end,
+		["Default"] = true
+	})
+	AnticheatBypassAutoConfigBig["Object"].BorderSizePixel = 0
+	AnticheatBypassAutoConfigBig["Object"].BackgroundTransparency = 0
+	AnticheatBypassAutoConfigBig["Object"].BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+	AnticheatBypassAutoConfigBig["Object"].Visible = false
+	AnticheatBypassAlternate = AnticheatBypass.CreateToggle({
+		["Name"] = "Alternate Numbers",
+		["Function"] = function() end
+	})
+	AnticheatBypassTransparent = AnticheatBypass.CreateToggle({
+		["Name"] = "Transparent",
+		["Function"] = function(callback) 
+			if oldcloneroot and AnticheatBypass["Enabled"] then
+				oldcloneroot.Transparency = callback and 1 or 0
+			end
+		end,
+		["Default"] = true
+	})
+	local changecheck = false
+--[[	AnticheatBypassCombatCheck = AnticheatBypass.CreateToggle({
+		["Name"] = "Combat Check",
+		["Function"] = function(callback) 
+			if callback then 
+				task.spawn(function()
+					repeat 
+						task.wait(0.1)
+						if (not AnticheatBypassCombatCheck["Enabled"]) then break end
+						if AnticheatBypass["Enabled"] then 
+							local plrs = GetAllNearestHumanoidToPosition(true, 30, 1)
+							combatcheck = #plrs > 0 and (not GuiLibrary["ObjectsThatCanBeSaved"]["LongJumpOptionsButton"]["Api"]["Enabled"]) and (not GuiLibrary["ObjectsThatCanBeSaved"]["FlyOptionsButton"]["Api"]["Enabled"])
+							if combatcheck ~= changecheck then 
+								if not combatcheck then 
+									combatchecktick = tick() + 1
+								end
+								changecheck = combatcheck
+							end
+						end
+					until (not AnticheatBypassCombatCheck["Enabled"])
+				end)
+			else
+				combatcheck = false
+			end
+		end,
+		["Default"] = true
+	})]]
+	AnticheatBypassNotification = AnticheatBypass.CreateToggle({
+		["Name"] = "Notifications",
+		["Function"] = function() end,
+		["Default"] = true
+	})
+	if shared.VapeDeveloper then 
+		AnticheatBypassTPSpeed = AnticheatBypass.CreateSlider({
+			["Name"] = "TPSpeed",
+			["Function"] = function(val) 
+				AnticheatBypassNumbers.TPSpeed = val / 100
+			end,
+			["Double"] = 100,
+			["Min"] = 1,
+			["Max"] = 100,
+			["Default"] = AnticheatBypassNumbers.TPSpeed * 100,
+		})
+		AnticheatBypassTPLerp = AnticheatBypass.CreateSlider({
+			["Name"] = "TPLerp",
+			["Function"] = function(val) 
+				AnticheatBypassNumbers.TPLerp = val / 100
+			end,
+			["Double"] = 100,
+			["Min"] = 1,
+			["Max"] = 100,
+			["Default"] = AnticheatBypassNumbers.TPLerp * 100,
+		})
+	end
+end)
+
 runcode(function()
 	local autoheal = {["Enabled"] = false}
 	local autohealval = {["Value"] = 100}
@@ -8606,23 +9806,6 @@ runcode(function()
 										for i,v in pairs(collectionservice:GetTagged("petrified-player")) do 
 											bedwars["ClientHandler"]:Get(bedwars["MinerRemote"]):SendToServer({
 												petrifyId = v:GetAttribute("PetrifyId")
-											})
-										end
-									end
-								until (not AutoKit["Enabled"])
-							end)
-						elseif kit == "dasher" then
-							task.spawn(function()
-								repeat
-									task.wait(0.1)
-									local dao = getItemNear("dao")
-									if entity.isAlive and lplr.Character:GetAttribute("CanDashNext") and lplr.Character:GetAttribute("CanDashNext") < workspace:GetServerTimeNow() and dao then
-										local plr = GetNearestHumanoidToPosition(true, 50)
-										if plr then
-											bedwars["ClientHandler"]:Get(bedwars["KatanaRemote"]):SendToServer({
-												direction = CFrame.lookAt(entity.character.HumanoidRootPart.Position, plr.Character.HumanoidRootPart.CFrame.p).lookVector,
-												origin = entity.character.HumanoidRootPart.Position,
-												weapon = dao.itemType
 											})
 										end
 									end
@@ -9127,7 +10310,7 @@ runcode(function()
 		end
 	})
 end)
-		
+
 runcode(function()
 	local CameraFix = {["Enabled"] = false}
 	CameraFix = GuiLibrary["ObjectsThatCanBeSaved"]["RenderWindow"]["Api"].CreateOptionsButton({
