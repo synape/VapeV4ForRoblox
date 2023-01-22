@@ -7477,11 +7477,11 @@ runcode(function()
 	end
 
 	fly = GuiLibrary["ObjectsThatCanBeSaved"]["BlatantWindow"]["Api"].CreateOptionsButton({
-		["Name"] = "InfiniteFly",
+		["Name"] = "InfiniteFlight",
 		["Function"] = function(callback)
 			if callback then
 				if not disabledproper then 
-					createwarning("InfiniteFly", "Wait for the last fly to finish", 3)
+					createwarning("InfiniteFlight", "Wait for the last fly to finish", 3)
 					fly["ToggleButton"](false)
 					return 
 				end
@@ -7587,15 +7587,15 @@ runcode(function()
 					part.Position = oldpos.p
 					disabledproper = false
 					if networkownerfunc(oldcloneroot) then 
-						createwarning("InfiniteFly", "Waiting "..(flydelay["Value"] / 100).."s to not flag", 3)
+						createwarning("InfiniteFlight", "Waiting "..(flydelay["Value"] / 100).."s to not flag", 3)
 						task.delay(flydelay["Value"] / 100, disablefunc, part)
 					else
-						createwarning("InfiniteFly", "Waiting until not flagged", 10)
+						createwarning("InfiniteFlight", "Waiting until not flagged", 10)
 						task.spawn(function()
 							repeat task.wait() until oldcloneroot and networkownerfunc(oldcloneroot) or oldcloneroot == nil
 							oldcloneroot.Velocity = Vector3.new(0, -1, 0)
 							oldcloneroot.CFrame = CFrame.new(oldcloneroot.Position.X, clone.CFrame.p.Y, oldcloneroot.Position.Z)
-							createwarning("InfiniteFly", "Waiting 1.5s to not flag", 3)
+							createwarning("InfiniteFlight", "Waiting 1.5s to not flag", 3)
 							task.wait(1.5)
 							disablefunc(part)
 						end)
@@ -7607,7 +7607,7 @@ runcode(function()
 				if flyendpress then flyendpress:Disconnect() end
 			end
 		end,
-		["HoverText"] = "Makes you go zoom"
+		["HoverText"] = "Makes you Fly infinitly"
 	})
 	flydelay = fly.CreateSlider({
 		["Name"] = "Land Delay",
