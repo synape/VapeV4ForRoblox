@@ -7536,7 +7536,7 @@ runcode(function()
 					clonesuccess = true
 				end
 				if not clonesuccess then 
-					createwarning("InfiniteFly", "Character missing", 3)
+					createwarning("InfiniteFflight", "Character missing", 3)
 					fly["ToggleButton"](false)
 					return 
 				end
@@ -7546,7 +7546,7 @@ runcode(function()
 						local newpos = {oldcloneroot.CFrame:GetComponents()}
 						newpos[1] = clone.CFrame.X
 						if newpos[2] < 1000 or (not goneup) then 
-							createwarning("Infinite Fly", "go up", 3)
+							createwarning("Infinite Flight", "go up", 3)
 							newpos[2] = 100000
 							goneup = true
 						end
@@ -7570,7 +7570,22 @@ runcode(function()
 			else
 				RunLoops:UnbindFromHeartbeat("InfiniteFly")
 				if clonesuccess and oldcloneroot and clone and lplr.Character.Parent == workspace and oldcloneroot.Parent ~= nil and disabledproper then 
-
+					local oldpos = clone.CFrame
+					local oldvelo = oldcloneroot.Velocity.Y
+					oldcloneroot.Velocity = Vector3.new(0, -1, 0)
+					oldcloneroot.CFrame = oldpos
+					local part = Instance.new("Part")
+					part.Anchored = true
+					part.CanCollide = false
+					part.Size = Vector3.new(1, 1, 1)
+					part.Color = Color3.new(0.5, 0.5, 1)
+					part.Transparency = 0.5
+					part.Shape = Enum.PartType.Ball
+					part.TopSurface = Enum.SurfaceType.Smooth
+					part.BottomSurface = Enum.SurfaceType.Smooth
+					part.Parent = workspace.GameSounds
+					part.Position = oldpos.p
+					disabledproper = false
 					if networkownerfunc(oldcloneroot) then 
 						createwarning("InfiniteFlight", "Waiting "..(flydelay["Value"] / 100).."s to not flag", 3)
 						task.delay(flydelay["Value"] / 100, disablefunc, part)
@@ -7581,7 +7596,7 @@ runcode(function()
 							oldcloneroot.Velocity = Vector3.new(0, -1, 0)
 							oldcloneroot.CFrame = CFrame.new(oldcloneroot.Position.X, clone.CFrame.p.Y, oldcloneroot.Position.Z)
 							createwarning("InfiniteFlight", "Waiting 1.5s to not flag", 3)
-							task.wait(1.5)
+							task.wait()
 							disablefunc(part)
 						end)
 					end
