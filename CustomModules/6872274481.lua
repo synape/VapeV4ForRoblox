@@ -7241,7 +7241,7 @@ runcode(function()
 				olddeflate = nil
 			end
 		end,
-		["HoverText"] = "Makes you go zoom (longer fly discovered by exelys and Cqded)",
+		["HoverText"] = "Makes you go zoom",
 		["ExtraText"] = function() 
 			if GuiLibrary["ObjectsThatCanBeSaved"]["Text GUIAlternate TextToggle"]["Api"]["Enabled"] then 
 				return alternatelist[table.find(flymode["List"], flymode["Value"])]
