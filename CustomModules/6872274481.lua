@@ -7593,7 +7593,7 @@ runcode(function()
 						createwarning("InfiniteFlight", "Waiting until not flagged", 10)
 						task.spawn(function()
 							repeat task.wait() until oldcloneroot and networkownerfunc(oldcloneroot) or oldcloneroot == nil
-							oldcloneroot.Velocity = Vector3.new(0, -1, 0)
+							oldcloneroot.Velocity = Vector3.new(0, 0, 0)
 							oldcloneroot.CFrame = CFrame.new(oldcloneroot.Position.X, clone.CFrame.p.Y, oldcloneroot.Position.Z)
 							createwarning("InfiniteFlight", "Waiting 1.5s to not flag", 3)
 							task.wait(1.5)
