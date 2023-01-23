@@ -7230,7 +7230,7 @@ runcode(function()
 				if flyacprogressbarframe then 
 					flyacprogressbarframe.Visible = false
 				end
-                            createwarning("FlightTimer", "Flight lasted " .. tostring(timer) .. " seconds", 1)
+			createwarning("FlightTimer", "Flight lasted " .. tostring(timer) .. " seconds", 4)
                             timer = 0
                         end)
 				if flypop["Enabled"] then
