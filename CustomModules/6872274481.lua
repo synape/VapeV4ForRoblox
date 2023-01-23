@@ -7230,9 +7230,6 @@ runcode(function()
 				if flyacprogressbarframe then 
 					flyacprogressbarframe.Visible = false
 				end
-			createwarning("FlightTimer", "Flight lasted " .. tostring(timer) .. " seconds", 4)
-                            timer = 0
-                        end)
 				if flypop["Enabled"] then
 					if entity.isAlive and lplr.Character:GetAttribute("InflatedBalloons") then
 						for i = 1, lplr.Character:GetAttribute("InflatedBalloons") do
