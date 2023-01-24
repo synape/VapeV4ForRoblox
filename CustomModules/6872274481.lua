@@ -7098,7 +7098,7 @@ runcode(function()
 	local lastonground = false
 	local alternatelist = {"Normal", "AntiCheat A", "AntiCheat B"}
 	fly = GuiLibrary["ObjectsThatCanBeSaved"]["BlatantWindow"]["Api"].CreateOptionsButton({
-		["Name"] = "Flight",
+		["Name"] = "Fly",
 		["Function"] = function(callback)
 			if callback then
 				olddeflate = bedwars["BalloonController"]["deflateBalloon"]
