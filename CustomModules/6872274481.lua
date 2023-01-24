@@ -7043,10 +7043,6 @@ end)
 
 local flymissile
 runcode(function()
-    local function studtoblock(startpos, pos)
-        local mag = math.round((startpos - pos).Magnitude / 3)
-        return mag
-    end
 	local OldNoFallFunction
 	local flymode = {["Value"] = "Normal"}
 	local flyverticalspeed = {["Value"] = 40}
@@ -7224,6 +7220,10 @@ runcode(function()
 					end
 				end)
 			else
+		     spawn(function()
+                    local blocks = studtoblock(startpos1, lplr.Character.HumanoidRootPart.Position)
+                    task.wait(0.1)
+                    createwarning("Fly", "Flew "..blocks.." blocks in "..flytime.." seconds", 3)
 				flyup = false
 				flydown = false
 				autobankballoon = false
@@ -7234,10 +7234,7 @@ runcode(function()
 				if flyacprogressbarframe then 
 					flyacprogressbarframe.Visible = false
 				end
-                spawn(function()
-                    local blocks = studtoblock(startpos1, lplr.Character.HumanoidRootPart.Position)
-                    task.wait(0.1)
-                    createwarning("Fly", "Flew "..blocks.." blocks in "..flytime.." seconds", 3)
+
 				if flypop["Enabled"] then
 					if entity.isAlive and lplr.Character:GetAttribute("InflatedBalloons") then
 						for i = 1, lplr.Character:GetAttribute("InflatedBalloons") do
