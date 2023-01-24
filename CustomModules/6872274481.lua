@@ -7220,10 +7220,6 @@ runcode(function()
 					end
 				end)
 			else
-		     spawn(function()
-                    local blocks = studtoblock(startpos1, lplr.Character.HumanoidRootPart.Position)
-                    task.wait(0.1)
-                    createwarning("Fly", "Flew "..blocks.." blocks in "..flytime.." seconds", 3)
 				flyup = false
 				flydown = false
 				autobankballoon = false
