@@ -7477,11 +7477,11 @@ runcode(function()
 	end
 
 	fly = GuiLibrary["ObjectsThatCanBeSaved"]["BlatantWindow"]["Api"].CreateOptionsButton({
-		["Name"] = "InfiniteFlight",
+		["Name"] = "InfiniteFly",
 		["Function"] = function(callback)
 			if callback then
 				if not disabledproper then 
-					createwarning("InfiniteFlight", "Wait for the last fly to finish", 3)
+					createwarning("InfiniteFly", "Wait for the last fly to finish", 3)
 					fly["ToggleButton"](false)
 					return 
 				end
@@ -7536,7 +7536,7 @@ runcode(function()
 					clonesuccess = true
 				end
 				if not clonesuccess then 
-					createwarning("InfiniteFflight", "Character missing", 3)
+					createwarning("InfiniteFly", "Character missing", 3)
 					fly["ToggleButton"](false)
 					return 
 				end
@@ -7546,7 +7546,7 @@ runcode(function()
 						local newpos = {oldcloneroot.CFrame:GetComponents()}
 						newpos[1] = clone.CFrame.X
 						if newpos[2] < 1000 or (not goneup) then 
-							createwarning("Infinite Flight", "go up", 3)
+							createwarning("InfiniteFly", "go up", 3)
 							newpos[2] = 100000
 							goneup = true
 						end
@@ -7587,15 +7587,15 @@ runcode(function()
 					part.Position = oldpos.p
 					disabledproper = false
 					if networkownerfunc(oldcloneroot) then 
-						createwarning("InfiniteFlight", "Waiting "..(flydelay["Value"] / 100).."s to not flag", 3)
+						createwarning("InfiniteFly", "Waiting "..(flydelay["Value"] / 100).."s to not flag", 3)
 						task.delay(flydelay["Value"] / 100, disablefunc, part)
 					else
-						createwarning("InfiniteFlight", "Waiting until not flagged", 10)
+						createwarning("InfiniteFly", "Waiting until not flagged", 10)
 						task.spawn(function()
 							repeat task.wait() until oldcloneroot and networkownerfunc(oldcloneroot) or oldcloneroot == nil
 							oldcloneroot.Velocity = Vector3.new(0, -1, 0)
 							oldcloneroot.CFrame = CFrame.new(oldcloneroot.Position.X, clone.CFrame.p.Y, oldcloneroot.Position.Z)
-							createwarning("InfiniteFlight", "Waiting 1.5s to not flag", 3)
+							createwarning("InfiniteFly", "Waiting 1.5s to not flag", 3)
 							task.wait()
 							disablefunc(part)
 						end)
