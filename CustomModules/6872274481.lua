@@ -8389,6 +8389,59 @@ runcode(function()
 		["HoverText"] = "Spawns and teleports a raven to a player\nnear your mouse."
 	})
 end)
+		
+runcode(function()
+	local SwordMoverdepth = {["Value"] = 8}
+	local SwordMoverhorizontal = {["Value"] = 8}
+	local rotationx = {["Value"] = 0}
+	local rotationy = {["Value"] = 0}
+	local rotationz = {["Value"] = 0}
+	local oldc1
+	SwordMover = GuiLibrary["ObjectsThatCanBeSaved"]["RenderWindow"]["Api"].CreateOptionsButton({
+		["Name"] = "SwordMover",
+		["Function"] = function(callback) 
+			if cam:FindFirstChild("Viewmodel") then
+				if callback then
+					lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_DEPTH_OFFSET", -(SwordMoverdepth["Value"] / 10))
+					lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_HORIZONTAL_OFFSET", (SwordMoverhorizontal["Value"] / 10))
+					pcall(function()
+						for i,v in pairs(cam.Viewmodel.Humanoid.Animator:GetPlayingAnimationTracks()) do 
+							v:Stop()
+						end
+					end)
+					bedwars["ViewmodelController"]:playAnimation(11)
+					cam.Viewmodel.RightHand.RightWrist.C1 = oldc1
+				else
+					lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_DEPTH_OFFSET", 0)
+					lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_HORIZONTAL_OFFSET", 0)
+				end
+			end
+		end,
+		["HoverText"] = "makes your sword farther"
+	})
+	SwordMoverdepth = SwordMover.CreateSlider({
+		["Name"] = "Depth",
+		["Min"] = 0,
+		["Max"] = 24,
+		["Default"] = 8,
+		["Function"] = function(val)
+			if SwordMover["Enabled"] then
+				lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_DEPTH_OFFSET", -(val / 10))
+			end
+		end
+	})
+	SwordMoverhorizontal = SwordMover.CreateSlider({
+		["Name"] = "Horizontal",
+		["Min"] = 0,
+		["Max"] = 24,
+		["Default"] = 8,
+		["Function"] = function(val)
+			if SwordMover["Enabled"] then
+				lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_HORIZONTAL_OFFSET", (val / 10))
+			end
+		end
+	})
+end)
 
 runcode(function()
 	local nobobdepth = {["Value"] = 8}
