@@ -8441,6 +8441,36 @@ runcode(function()
 			end
 		end
 	})
+	rotationx = nobob.CreateSlider({
+		["Name"] = "RotX",
+		["Min"] = 0,
+		["Max"] = 360,
+		["Function"] = function(val)
+			if nobob["Enabled"] then
+				cam.Viewmodel.RightHand.RightWrist.C1 = oldc1 * CFrame.Angles(math.rad(rotationx["Value"]), math.rad(rotationy["Value"]), math.rad(rotationz["Value"]))
+			end
+		end
+	})
+	rotationy = nobob.CreateSlider({
+		["Name"] = "RotY",
+		["Min"] = 0,
+		["Max"] = 360,
+		["Function"] = function(val)
+			if nobob["Enabled"] then
+				cam.Viewmodel.RightHand.RightWrist.C1 = oldc1 * CFrame.Angles(math.rad(rotationx["Value"]), math.rad(rotationy["Value"]), math.rad(rotationz["Value"]))
+			end
+		end
+	})
+	rotationz = nobob.CreateSlider({
+		["Name"] = "RotZ",
+		["Min"] = 0,
+		["Max"] = 360,
+		["Function"] = function(val)
+			if nobob["Enabled"] then
+				cam.Viewmodel.RightHand.RightWrist.C1 = oldc1 * CFrame.Angles(math.rad(rotationx["Value"]), math.rad(rotationy["Value"]), math.rad(rotationz["Value"]))
+			end
+		end
+	})
 end)
 
 runcode(function()
