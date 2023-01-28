@@ -3361,7 +3361,7 @@ runcode(function()
 					repeat task.wait() until queueType ~= "bedwars_test"
 					if (not ChestStealerSkywars["Enabled"]) or queueType:find("skywars") then
 						repeat 
-							task.wait(0.01)
+							task.wait(0.0001)
 							if entity.isAlive then
 								cheststealerfuncs[ChestStealerOpen["Enabled"] and "Open" or "Closed"]()
 							end
