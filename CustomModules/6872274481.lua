@@ -4768,7 +4768,7 @@ runcode(function()
 	longjumpacprogressbartext.Parent = longjumpacprogressbarframe
 	local sliderval = {["Value"] = 1.5}
 	longjump = GuiLibrary["ObjectsThatCanBeSaved"]["BlatantWindow"]["Api"].CreateOptionsButton({
-		["Name"] = "LongJump",
+		["Name"] = "DamageFly",
 		["Function"] = function(callback)
 			if callback then
 				task.spawn(function()
