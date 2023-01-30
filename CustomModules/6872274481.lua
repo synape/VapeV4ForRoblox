@@ -11122,7 +11122,7 @@ SmallWeapons = GuiLibrary["ObjectsThatCanBeSaved"]["PrivateWindow"]["Api"].Creat
 	Smaller = SmallWeapons.CreateSlider({
 		["Name"] = "Valua",
 		["Min"] = 0,
-		["Max"] = 10,
+		["Max"] = 11,
 		["Function"] = function(val) end,
 		["Default"] = 3
 	})
