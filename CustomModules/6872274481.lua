@@ -7126,7 +7126,7 @@ runcode(function()
 				end)
 				clonesuccess = false
 				if entity.isAlive then
-				        local start = tick()
+				 
 					oldcloneroot = entity.character.HumanoidRootPart
 					lplr.Character.Parent = game
 					clone = oldcloneroot:Clone()
@@ -7219,7 +7219,6 @@ runcode(function()
 							oldcloneroot.Velocity = Vector3.new(0, -1, 0)
 							oldcloneroot.CFrame = CFrame.new(oldcloneroot.Position.X, clone.CFrame.p.Y, oldcloneroot.Position.Z)
 							createwarning("InfiniteFly", "Waiting 1.5s to not flag", 3)
-						        createwarning("InfiniteFly", "Fligh for "..math.abs(start - tick()).." Seconds", 5)
 							task.wait(1.5)
 							disablefunc(part)
 						end)
