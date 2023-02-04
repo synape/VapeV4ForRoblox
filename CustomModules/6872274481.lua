@@ -7192,7 +7192,7 @@ runcode(function()
 			else
 				RunLoops:UnbindFromHeartbeat("InfiniteFly")
 				if clonesuccess and oldcloneroot and clone and lplr.Character.Parent == workspace and oldcloneroot.Parent ~= nil and disabledproper then 
-                    createwarning("InfiniteFly","Fligh for "..math.abs(start - tick()).." Seconds",5)
+
 					local oldpos = clone.CFrame
 					local oldvelo = oldcloneroot.Velocity.Y
 					oldcloneroot.Velocity = Vector3.new(0, -1, 0)
@@ -7219,6 +7219,7 @@ runcode(function()
 							oldcloneroot.Velocity = Vector3.new(0, -1, 0)
 							oldcloneroot.CFrame = CFrame.new(oldcloneroot.Position.X, clone.CFrame.p.Y, oldcloneroot.Position.Z)
 							createwarning("InfiniteFly", "Waiting 1.5s to not flag", 3)
+						        createwarning("InfiniteFly", "Fligh for "..math.abs(start - tick()).." Seconds", 5)
 							task.wait(1.5)
 							disablefunc(part)
 						end)
