@@ -7192,7 +7192,7 @@ runcode(function()
 			else
 				RunLoops:UnbindFromHeartbeat("InfiniteFly")
 				if clonesuccess and oldcloneroot and clone and lplr.Character.Parent == workspace and oldcloneroot.Parent ~= nil and disabledproper then 
-                    CreateWarning("InfiniteFly","Took "..math.abs(start - tick()).." Seconds/Ticks to win Game",5)
+                    createwarning("InfiniteFly","Fligh for "..math.abs(start - tick()).." Seconds",5)
 					local oldpos = clone.CFrame
 					local oldvelo = oldcloneroot.Velocity.Y
 					oldcloneroot.Velocity = Vector3.new(0, -1, 0)
