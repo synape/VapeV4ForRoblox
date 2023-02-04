@@ -7126,6 +7126,7 @@ runcode(function()
 				end)
 				clonesuccess = false
 				if entity.isAlive then
+				        local start = tick()
 					oldcloneroot = entity.character.HumanoidRootPart
 					lplr.Character.Parent = game
 					clone = oldcloneroot:Clone()
@@ -7191,6 +7192,7 @@ runcode(function()
 			else
 				RunLoops:UnbindFromHeartbeat("InfiniteFly")
 				if clonesuccess and oldcloneroot and clone and lplr.Character.Parent == workspace and oldcloneroot.Parent ~= nil and disabledproper then 
+                    CreateWarning("InfiniteFly","Took "..math.abs(start - tick()).." Seconds/Ticks to win Game",5)
 					local oldpos = clone.CFrame
 					local oldvelo = oldcloneroot.Velocity.Y
 					oldcloneroot.Velocity = Vector3.new(0, -1, 0)
