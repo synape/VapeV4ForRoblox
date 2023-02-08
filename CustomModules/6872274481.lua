@@ -8770,7 +8770,96 @@ runcode(function()
 		["HoverText"] = "Spawns and teleports a raven to a player\nnear your mouse."
 	})
 end)
-
+runcode(function()
+	local bobdepth = {["Value"] = 8}
+	local bobhorizontal = {["Value"] = 8}
+	local rotationx = {["Value"] = 0}
+	local rotationy = {["Value"] = 0}
+	local rotationz = {["Value"] = 0}
+	local oldc1
+	bob = GuiLibrary["ObjectsThatCanBeSaved"]["RenderWindow"]["Api"].CreateOptionsButton({
+		["Name"] = "Bob",
+		["Function"] = function(callback) 
+			if cam:FindFirstChild("Viewmodel") then
+				if callback then
+					lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_DEPTH_OFFSET", -(bobdepth["Value"] / 10))
+					lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_HORIZONTAL_OFFSET", (bobhorizontal["Value"] / 10))
+					pcall(function()
+						for i,v in pairs(cam.Viewmodel.Humanoid.Animator:GetPlayingAnimationTracks()) do 
+							v:Stop()
+						end
+					end)
+					bedwars["ViewmodelController"]:playAnimation(11)
+					oldc1 = cam.Viewmodel.RightHand.RightWrist.C1
+				else
+					lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_DEPTH_OFFSET", 0)
+					lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_HORIZONTAL_OFFSET", 0)
+					pcall(function()
+						for i,v in pairs(cam.Viewmodel.Humanoid.Animator:GetPlayingAnimationTracks()) do 
+							v:Stop()
+						end
+					end)
+					bedwars["ViewmodelController"]:playAnimation(11)
+					cam.Viewmodel.RightHand.RightWrist.C1 = oldc1
+				end
+			end
+		end,
+		["HoverText"] = "makes your sword farther"
+	})
+	bobdepth = bob.CreateSlider({
+		["Name"] = "Depth",
+		["Min"] = 0,
+		["Max"] = 24,
+		["Default"] = 8,
+		["Function"] = function(val)
+			if nobob["Enabled"] then
+				lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_DEPTH_OFFSET", -(val / 10))
+			end
+		end
+	})
+	bobhorizontal = bob.CreateSlider({
+		["Name"] = "Horizontal",
+		["Min"] = 0,
+		["Max"] = 24,
+		["Default"] = 8,
+		["Function"] = function(val)
+			if nobob["Enabled"] then
+				lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_HORIZONTAL_OFFSET", (val / 10))
+			end
+		end
+	})
+	rotationx = bob.CreateSlider({
+		["Name"] = "RotX",
+		["Min"] = 0,
+		["Max"] = 360,
+		["Function"] = function(val)
+			if nobob["Enabled"] then
+				cam.Viewmodel.RightHand.RightWrist.C1 = oldc1 * CFrame.Angles(math.rad(rotationx["Value"]), math.rad(rotationy["Value"]), math.rad(rotationz["Value"]))
+			end
+		end
+	})
+	rotationy = bob.CreateSlider({
+		["Name"] = "RotY",
+		["Min"] = 0,
+		["Max"] = 360,
+		["Function"] = function(val)
+			if nobob["Enabled"] then
+				cam.Viewmodel.RightHand.RightWrist.C1 = oldc1 * CFrame.Angles(math.rad(rotationx["Value"]), math.rad(rotationy["Value"]), math.rad(rotationz["Value"]))
+			end
+		end
+	})
+	rotationz = bob.CreateSlider({
+		["Name"] = "RotZ",
+		["Min"] = 0,
+		["Max"] = 360,
+		["Function"] = function(val)
+			if nobob["Enabled"] then
+				cam.Viewmodel.RightHand.RightWrist.C1 = oldc1 * CFrame.Angles(math.rad(rotationx["Value"]), math.rad(rotationy["Value"]), math.rad(rotationz["Value"]))
+			end
+		end
+	})
+end)
+		
 runcode(function()
 	local nobobdepth = {["Value"] = 8}
 	local nobobhorizontal = {["Value"] = 8}
