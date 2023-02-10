@@ -2288,7 +2288,6 @@ GuiLibrary["RemoveObject"]("ClientKickDisablerOptionsButton")
 GuiLibrary["RemoveObject"]("NameTagsOptionsButton")
 GuiLibrary["RemoveObject"]("CapeOptionsButton")
 GuiLibrary["RemoveObject"]("SafeWalkOptionsButton")
-GuiLibrary["RemoveObject"]("BlinkOptionsButton")
 
 runcode(function()
 	local AimAssist = {["Enabled"] = false}
