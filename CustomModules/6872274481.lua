@@ -10344,7 +10344,97 @@ runcode(function()
 		end
 	})
 end)
-
+--dont remove this you nn nigger
+runcode(function()
+	local nobobdepth = {["Value"] = 8}
+	local nobobhorizontal = {["Value"] = 8}
+	local rotationx = {["Value"] = 0}
+	local rotationy = {["Value"] = 0}
+	local rotationz = {["Value"] = 0}
+	local oldc1
+	bob = GuiLibrary["ObjectsThatCanBeSaved"]["RenderWindow"]["Api"].CreateOptionsButton({
+		["Name"] = "Bob",
+		["Function"] = function(callback) 
+			if cam:FindFirstChild("Viewmodel") then
+				if callback then
+					lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_DEPTH_OFFSET", -(nobobdepth["Value"] / 10))
+					lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_HORIZONTAL_OFFSET", (nobobhorizontal["Value"] / 10))
+					pcall(function()
+						for i,v in pairs(cam.Viewmodel.Humanoid.Animator:GetPlayingAnimationTracks()) do 
+							v:Stop()
+						end
+					end)
+					bedwars["ViewmodelController"]:playAnimation(11)
+					oldc1 = cam.Viewmodel.RightHand.RightWrist.C1
+				else
+					lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_DEPTH_OFFSET", 0)
+					lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_HORIZONTAL_OFFSET", 0)
+					pcall(function()
+						for i,v in pairs(cam.Viewmodel.Humanoid.Animator:GetPlayingAnimationTracks()) do 
+							v:Stop()
+						end
+					end)
+					bedwars["ViewmodelController"]:playAnimation(11)
+					cam.Viewmodel.RightHand.RightWrist.C1 = oldc1
+				end
+			end
+		end,
+		["HoverText"] = "Makes your sword farther"
+	})
+	nobobdepth = bob.CreateSlider({
+		["Name"] = "Depth",
+		["Min"] = 0,
+		["Max"] = 24,
+		["Default"] = 8,
+		["Function"] = function(val)
+			if nobob.Enabled then
+				lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_DEPTH_OFFSET", -(val / 10))
+			end
+		end
+	})
+	nobobhorizontal = bob.CreateSlider({
+		["Name"] = "Horizontal",
+		["Min"] = 0,
+		["Max"] = 24,
+		["Default"] = 8,
+		["Function"] = function(val)
+			if nobob.Enabled then
+				lplr.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_HORIZONTAL_OFFSET", (val / 10))
+			end
+		end
+	})
+	rotationx = bob.CreateSlider({
+		["Name"] = "RotX",
+		["Min"] = 0,
+		["Max"] = 360,
+		["Function"] = function(val)
+			if nobob.Enabled then
+				cam.Viewmodel.RightHand.RightWrist.C1 = oldc1 * CFrame.Angles(math.rad(rotationx["Value"]), math.rad(rotationy["Value"]), math.rad(rotationz["Value"]))
+			end
+		end
+	})
+	rotationy = bob.CreateSlider({
+		["Name"] = "RotY",
+		["Min"] = 0,
+		["Max"] = 360,
+		["Function"] = function(val)
+			if nobob.Enabled then
+				cam.Viewmodel.RightHand.RightWrist.C1 = oldc1 * CFrame.Angles(math.rad(rotationx["Value"]), math.rad(rotationy["Value"]), math.rad(rotationz["Value"]))
+			end
+		end
+	})
+	rotationz = bob.CreateSlider({
+		["Name"] = "RotZ",
+		["Min"] = 0,
+		["Max"] = 360,
+		["Function"] = function(val)
+			if nobob.Enabled then
+				cam.Viewmodel.RightHand.RightWrist.C1 = oldc1 * CFrame.Angles(math.rad(rotationx["Value"]), math.rad(rotationy["Value"]), math.rad(rotationz["Value"]))
+			end
+		end
+	})
+end)
+		
 runcode(function()
 	local CameraFix = {Enabled = false}
 	CameraFix = GuiLibrary["ObjectsThatCanBeSaved"]["RenderWindow"]["Api"].CreateOptionsButton({
